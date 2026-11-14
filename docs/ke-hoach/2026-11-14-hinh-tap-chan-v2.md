@@ -1,6 +1,6 @@
 # Kế hoạch: nâng cấp hình minh hoạ tập chân
 
-Ngày: 14/11/2026 · Một mốc, một PR · Trạng thái: đã duyệt 14/11/2026, đang làm
+Ngày: 14/11/2026 · Một mốc, một PR · Trạng thái: đã làm, chưa thử trên iPhone thật
 
 ## Mục tiêu
 
@@ -35,10 +35,19 @@ Hình tập chân hiện là người que, hai tư thế nội suy thẳng, vùn
 - Trình duyệt giả lập iPhone: chụp từng động tác ở 3–4 pha, tự soi, không lỗi console.
 - **Chưa thử trên iPhone thật**: hình chuyển động, độ mượt, mức dùng pin.
 
+## Kết quả
+
+- `npm test` xanh (35 ca, 7 ca mới ở `test/figures.test.js`).
+- Trình duyệt giả lập iPhone: chụp 9 động tác ở 4–6 pha, chạy bài bơm máu qua màn giới thiệu và màn đếm, tạm dừng giữ nguyên hình, tiếp tục chạy lại, không lỗi hay cảnh báo console.
+- Hình đã đổi sang tư thế 3/4 cho «mở gối» (hai gót chạm nhau, gối trên mở ra, chữ V rõ) và «số 4» (mắt cá gác lên gối chân kia, vùng mông tô xanh có sọc).
+- Chưa thử trên iPhone thật: độ mượt, mức dùng pin, thang màu trên màn thật.
+
 ## Giới hạn
 
 - Vẫn là hình minh hoạ 2 chiều, không phải tranh giải phẫu; hình dạng bó cơ là đơn giản hoá.
 - Không đo được độ giống người thật bằng test, chỉ bằng mắt qua ảnh chụp; có thể cần chỉnh thêm sau khi có người xem trên máy thật.
+- «Số 4» và «mở gối» đọc được nhưng vẫn là hình nhỏ; chân gác trong «số 4» nhìn hơi dài so với thật. Chưa làm khung phóng to vùng mông như đã dự kiến, vì sọc xanh trên vùng mông đã đủ báo vùng đang giãn.
+- Cơ tứ đầu đùi vẫn chưa có nguồn giải phẫu riêng; dòng chữ về cơ này giữ nguyên như kế hoạch cũ.
 - App hướng dẫn vận động, không chẩn đoán.
 
 ## Phiếu chốt
