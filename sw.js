@@ -1,6 +1,6 @@
 // Chạy không cần mạng: trả bản đã lưu ngay, đồng thời tải bản mới về cho lần mở sau.
-const CACHE = 'hitdat-4';
-const FILES = ['./', 'index.html', 'style.css', 'app.js', 'program.js', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-180.png', 'icons/icon-512.png'];
+const CACHE = 'hitdat-5';
+const FILES = ['./', 'index.html', 'style.css', 'app.js', 'program.js', 'legs.js', 'figures.js', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-180.png', 'icons/icon-512.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(FILES)).then(() => self.skipWaiting()));

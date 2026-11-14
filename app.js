@@ -3,6 +3,10 @@ import {
   GOAL, initialState, planSession, applyTest, applySession, upcoming,
   sessionPassed, makeRepDetector, chooseCalibration,
 } from './program.js';
+import {
+  EX, levelFor, legsPlan, pumpPlan, buildSteps, estimateMinutes, legsDone, doneOn, describe,
+} from './legs.js';
+import { figureSvg } from './figures.js';
 
 const KEY = 'hitdat.v1';
 const $app = document.getElementById('app');
@@ -217,6 +221,8 @@ function viewHome() {
       </div>
     </div>
 
+    ${legsCard(early)}
+
     ${up.length > 1 ? `
     <h2>Lịch sắp tới</h2>
     <div class="card list">
@@ -249,6 +255,7 @@ function viewHome() {
   `);
 
   on('go', () => startWorkout(next.type));
+  bindLegs();
   on('retest', () => startWorkout('test'));
   on('mode', () => { state.settings.mode = state.settings.mode === 'camera' ? 'touch' : 'camera'; save(); viewHome(); });
   on('sound', () => { state.settings.sound = !state.settings.sound; save(); unlockAudio(); beep(880); viewHome(); });
@@ -267,6 +274,10 @@ function viewHome() {
 }
 
 function historyRow(h) {
+  if (h.type === 'legs' || h.type === 'pump') {
+    return `<div><div class="row"><span>${h.type === 'legs' ? 'Buổi chân · mức ' + h.level : 'Bơm máu bắp chân'}</span><span class="dim small">${fmtPast(h.date)}</span></div>
+      <div class="dim small">${h.minutes} phút${h.skipped ? ' · bỏ qua ' + h.skipped + ' động tác' : ''}</div></div>`;
+  }
   if (h.type === 'test') {
     return `<div><div class="row"><span>Bài thử sức</span><span class="dim small">${fmtPast(h.date)}</span></div>
       <div class="small"><b>${h.count}</b> cái một hơi</div></div>`;
@@ -331,10 +342,226 @@ function viewWelcome() {
       <button class="primary" id="go">Làm bài thử đầu tiên</button>
       <button id="mode">Cách đếm: ${state.settings.mode === 'camera' ? 'Camera + chạm' : 'Chỉ chạm màn hình'}</button>
     </div>
+    ${legsCard(true)}
     ${CREDIT}
   `);
   on('go', () => startWorkout('test'));
+  bindLegs();
   on('mode', () => { state.settings.mode = state.settings.mode === 'camera' ? 'touch' : 'camera'; save(); viewWelcome(); });
+}
+
+// ---------- Tập chân ----------
+function legsCard(pushupRestDay) {
+  const t = today();
+  const n = legsDone(state.history);
+  const level = levelFor(n);
+  const plan = legsPlan(level);
+  const mins = estimateMinutes(buildSteps(plan));
+  const legsToday = doneOn(state.history, 'legs', t);
+  const pumpToday = doneOn(state.history, 'pump', t);
+  const note = legsToday ? 'Đã tập chân hôm nay ✓'
+    : pushupRestDay ? 'Hôm nay nghỉ hít đất — hợp để tập chân.'
+    : 'Hôm nay là ngày hít đất; buổi chân nên để ngày nghỉ.';
+  const primary = pushupRestDay && !legsToday;
+  return `
+    <h2>Tập chân</h2>
+    <div class="card">
+      <div class="row"><b>Buổi chân · mức ${level}</b><span class="pill">${mins} phút</span></div>
+      <p class="dim small">${plan.map((i) => `${EX[i.ex].name} ${describe(i)}`).join(' · ')}</p>
+      <p class="small" style="color:var(--accent)">${note}</p>
+      <div class="btns">
+        <button id="legs" class="${primary ? 'primary' : ''}">Bắt đầu buổi chân</button>
+        <button id="pump">${pumpToday ? '✓ Đã bơm máu hôm nay — làm lần nữa' : 'Bơm máu bắp chân 2 phút (mỗi ngày)'}</button>
+        <button id="guide" class="ghost">Xem hình động tác và lưu ý</button>
+      </div>
+      <p class="dim small" style="margin-bottom:0">Đã tập ${n} buổi chân. Cứ 6 buổi lên một mức.</p>
+    </div>`;
+}
+function bindLegs() {
+  on('legs', () => startLegs('legs'));
+  on('pump', () => startLegs('pump'));
+  on('guide', viewGuide);
+}
+
+function viewGuide() {
+  const ids = ['ankle', 'calf', 'bridge', 'clam', 'squat', 'fig4', 'calf1', 'bridge1', 'split'];
+  render(`
+    <h1>Tập chân</h1>
+    <p class="dim small">Bắp chân co bóp là cái bơm đẩy máu từ chân về tim. Mông và hông khoẻ thì đỡ bị ép khi nằm nghiêng.</p>
+    <div class="card">
+      ${ids.map((id, i) => `<div class="guide-ex">
+        <b>${EX[id].name}</b>${i >= 6 ? ' <span class="pill">mức 3</span>' : ''}
+        ${figureSvg(id, EX[id].tempo || 4)}
+        <ul class="tight small">${EX[id].how.map((x) => `<li>${x}</li>`).join('')}</ul>
+        <p class="dim small" style="margin:0">${EX[id].avoid}</p>
+      </div>`).join('')}
+    </div>
+    <h2>Khi nằm nghiêng</h2>
+    <div class="card">
+      <ul class="tight small">
+        <li>Kẹp một chiếc gối giữa hai đầu gối để hông trên không sụp xuống.</li>
+        <li>Đổi bên trong đêm, đừng nằm mãi một bên.</li>
+        <li>Ngồi lâu thì mỗi giờ đứng dậy đi lại hoặc gập duỗi cổ chân 20 lần.</li>
+      </ul>
+    </div>
+    <h2>Dừng tập và đi khám khi</h2>
+    <div class="card">
+      <ul class="tight small">
+        <li><b>Một bên chân sưng, nóng, đỏ hoặc đau bắp chân</b> — đi khám ngay trong ngày, không xoa bóp.</li>
+        <li>Tê, châm chích chạy dọc chân, hoặc chân yếu đi.</li>
+        <li>Mỏi không đỡ sau 2 tuần tập đều.</li>
+      </ul>
+      <p class="dim small" style="margin-bottom:0">App chỉ hướng dẫn vận động, không thay cho chẩn đoán của bác sĩ.</p>
+    </div>
+    <div class="btns"><button id="back">Về trang chính</button></div>
+    ${CREDIT}
+  `);
+  on('back', viewHome);
+}
+
+// Trình dẫn tập: đi lần lượt qua các bước intro → work → rest, tự đếm nhịp.
+let legs = null;
+function startLegs(kind) {
+  unlockAudio();
+  const level = levelFor(legsDone(state.history));
+  const plan = kind === 'pump' ? pumpPlan() : legsPlan(level);
+  legs = { kind, level, steps: buildSteps(plan, kind === 'pump' ? 10 : undefined), i: 0, started: Date.now(), skipped: 0, paused: false };
+  workout = { phase: 'legs' }; // để giữ màn hình sáng khi quay lại app
+  keepAwake(true);
+  legsStep();
+}
+function legsNext() { legs.i += 1; legsStep(); }
+// Bỏ qua cả động tác đang làm: nhảy tới bước intro kế tiếp.
+function legsSkipExercise() {
+  legs.skipped += 1;
+  let j = legs.i + 1;
+  while (j < legs.steps.length && legs.steps[j].type !== 'intro') j += 1;
+  legs.i = j;
+  legsStep();
+}
+function legsStep() {
+  clearTimers();
+  if (legs.i >= legs.steps.length) return legsFinish();
+  const st = legs.steps[legs.i];
+  const total = legs.steps.filter((x) => x.type === 'intro').length;
+  const idx = legs.steps.slice(0, legs.i + 1).filter((x) => x.type === 'intro').length;
+  const top = `Động tác ${idx}/${total}`;
+  if (st.type === 'intro') return legsIntro(st, top);
+  if (st.type === 'rest') return legsRest(st, top);
+  return legsWork(st, top);
+}
+function legsIntro(st, top) {
+  const ex = EX[st.ex];
+  let left = st.sec;
+  const draw = () => {
+    stage(`
+      <div style="flex:1;overflow:auto">
+        <h1>${ex.name}</h1>
+        <p class="dim small">${describe(st)}</p>
+        ${figureSvg(st.ex, ex.tempo || 4)}
+        <ul class="tight">${ex.how.map((x) => `<li>${x}</li>`).join('')}</ul>
+        <p class="dim small">${ex.avoid}</p>
+      </div>
+      <div class="btns two">
+        <button id="skipex">Bỏ qua động tác</button>
+        <button class="primary" id="now">Bắt đầu (${left})</button>
+      </div>`, { top });
+    on('now', () => { beep(1320, 220); legsNext(); });
+    on('skipex', legsSkipExercise);
+  };
+  draw();
+  every(() => {
+    left -= 1;
+    if (left <= 0) { beep(1320, 220); legsNext(); return; }
+    if (left <= 3) soundTick(left);
+    const b = document.getElementById('now');
+    if (b) b.textContent = `Bắt đầu (${left})`;
+  }, 1000);
+}
+function legsWork(st, top) {
+  const ex = EX[st.ex];
+  const hold = ex.kind === 'hold';
+  let left = st.n;
+  const sideName = st.side === 1 ? 'Chân phải' : st.side === 2 ? 'Chân trái' : '';
+  const lbl = [ex.name, st.sets > 1 ? `hiệp ${st.set}/${st.sets}` : '', sideName].filter(Boolean).join(' · ');
+  stage(`
+    <div class="pad" id="pad">
+      <div class="lbl">${lbl}</div>
+      ${figureSvg(st.ex, hold ? 4 : ex.tempo)}
+      <div class="num mid" id="num">${left}</div>
+      <div class="hint">${hold ? 'Giữ yên, thở đều' : 'Mỗi tiếng báo là một lượt'}</div>
+    </div>
+    <div class="btns two">
+      <button id="pause">Tạm dừng</button>
+      <button id="skipex">Bỏ qua động tác</button>
+    </div>`, { top });
+  on('skipex', legsSkipExercise);
+  on('pause', () => {
+    legs.paused = !legs.paused;
+    document.getElementById('pause').textContent = legs.paused ? 'Tiếp tục' : 'Tạm dừng';
+    const svg = document.querySelector('.pad svg.fig');
+    if (svg) legs.paused ? svg.pauseAnimations() : svg.unpauseAnimations();
+  });
+  legs.paused = false;
+  every(() => {
+    if (legs.paused) return;
+    left -= 1;
+    const num = document.getElementById('num');
+    if (num) num.textContent = Math.max(0, left);
+    if (left <= 0) { soundSetDone(); legsNext(); return; }
+    if (hold) { if (left <= 3) soundTick(left); } else soundRep(left);
+  }, hold ? 1000 : ex.tempo * 1000);
+}
+function legsRest(st, top) {
+  let left = st.sec;
+  const nextWork = legs.steps.slice(legs.i + 1).find((x) => x.type === 'work');
+  const nextEx = nextWork ? EX[nextWork.ex] : null;
+  const hint = nextWork ? `Kế tiếp: ${nextEx.name}${nextWork.side === 2 ? ' · chân trái' : nextWork.sets > 1 ? ` · hiệp ${nextWork.set}/${nextWork.sets}` : ''}` : '';
+  const draw = () => {
+    stage(`
+      <div class="pad rest">
+        <div class="lbl">${st.label}</div>
+        <div class="num">${left}</div>
+        <div class="hint">${hint}</div>
+      </div>
+      <div class="btns"><button id="skip">Vào luôn</button></div>`, { top });
+    on('skip', () => { beep(1320, 220); legsNext(); });
+  };
+  draw();
+  every(() => {
+    left -= 1;
+    if (left <= 0) { beep(1320, 220); legsNext(); return; }
+    if (left <= 3) soundTick(left);
+    draw();
+  }, 1000);
+}
+function legsFinish() {
+  clearTimers();
+  keepAwake(false);
+  const l = legs;
+  const totalEx = l.steps.filter((x) => x.type === 'intro').length;
+  const minutes = Math.max(1, Math.round((Date.now() - l.started) / 60000));
+  const counted = l.skipped < totalEx; // bỏ qua hết thì không ghi
+  if (counted) {
+    state.history.push({ type: l.kind, date: today(), level: l.level, minutes, skipped: l.skipped });
+    save();
+    soundFinish();
+  }
+  workout = { phase: 'summary' };
+  const n = legsDone(state.history);
+  const newLevel = levelFor(n);
+  stage(`
+    <div style="flex:1;overflow:auto">
+      <h1>${counted ? (l.kind === 'pump' ? 'Xong bài bơm máu' : 'Xong buổi chân') : 'Chưa tập động tác nào'}</h1>
+      <div class="card">
+        <div class="dim small">Thời gian</div><div class="big">${minutes} phút</div>
+        <p class="dim small" style="margin-bottom:0">${counted ? `Làm ${totalEx - l.skipped}/${totalEx} động tác.` : 'Buổi này không được ghi vào lịch sử.'}
+        ${counted && l.kind === 'legs' ? (newLevel > l.level ? ` Lên mức ${newLevel} từ buổi sau.` : ` Đã tập ${n} buổi chân, mức ${newLevel}.`) : ''}</p>
+      </div>
+      <div class="card"><p class="small" style="margin:0">Đứng dậy đi lại một hai phút. Uống nước.</p></div>
+    </div>
+    <div class="btns"><button class="primary" id="home">Về trang chính</button></div>`, { quit: false });
+  on('home', viewHome);
 }
 
 // ---------- Buổi tập / bài thử ----------

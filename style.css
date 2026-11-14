@@ -94,3 +94,19 @@ svg.chart { width: 100%; height: auto; display: block; }
 svg.chart text { fill: var(--dim); font-size: 11px; }
 
 .credit { margin-top: 28px; text-align: center; font-size: 12px; color: var(--dim); opacity: .7; }
+
+/* Hình người que minh hoạ động tác chân */
+svg.fig { width: 100%; max-width: 340px; height: auto; display: block; margin: 0 auto; }
+svg.fig .ground { stroke: var(--line); stroke-width: 2; stroke-linecap: round; }
+svg.fig .bone { stroke-width: 7; stroke-linecap: round; }
+svg.fig .bone.body { stroke: var(--text); }
+svg.fig .bone.far { stroke: #6b727c; }
+svg.fig .bone.near { stroke: var(--accent); }
+svg.fig .headc { fill: var(--text); }
+.pad .fig { max-height: 30vh; width: auto; }
+.pad .num.mid { font-size: min(34vw, 26vh); }
+.guide-ex { padding: 14px 0; border-top: 1px solid var(--line); }
+.guide-ex:first-child { border-top: 0; padding-top: 0; }
+.guide-ex svg.fig { max-width: 260px; }
+ul.tight { padding-left: 20px; margin: 6px 0; }
+ul.tight li { margin: 4px 0; }
