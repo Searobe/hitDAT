@@ -6,6 +6,7 @@ App tập hít đất: thử sức → lên lịch → đếm lượt, mục ti�
 
 - Web app tĩnh, không bước dựng, không thư viện ngoài. Chạy trên Safari iOS, thêm ra màn hình chính.
 - `program.js` — lõi chương trình tập, hàm thuần (mọi con số của chương trình ở đây).
+- `legs.js` — chương trình tập chân, hàm thuần (động tác, mức, chuỗi bước). `figures.js` — hình người que chuyển động (SVG, hai tư thế mỗi động tác).
 - `app.js` — giao diện, camera, âm thanh, lưu trữ (`localStorage`, khoá `hitdat.v1`).
 - `sw.js` — chạy không cần mạng. `manifest.webmanifest`, `icons/` — cài ra màn hình chính.
 
@@ -17,7 +18,8 @@ App tập hít đất: thử sức → lên lịch → đếm lượt, mục ti�
 
 ## Luật quan trọng
 
-- Đổi luật chương trình tập thì sửa `program.js` và thêm ca kiểm ở `test/program.test.js` trong cùng PR.
+- Đổi luật chương trình tập thì sửa `program.js` / `legs.js` và thêm ca kiểm ở `test/` trong cùng PR.
+- Nội dung sức khoẻ (động tác, liều tập, dấu hiệu cần đi khám) phải có nguồn ghi ở `docs/ke-hoach/`; app không chẩn đoán, không hứa chữa bệnh.
 - Đổi bất kỳ file nào trong danh sách `FILES` của `sw.js` thì tăng số ở `CACHE` (`hitdat-1` → `hitdat-2`), không thì máy đã cài giữ bản cũ.
 - Đổi hình dạng dữ liệu lưu thì tăng `v` và viết bước chuyển đổi; không làm mất lịch sử tập của người dùng.
 - Hình camera chỉ đọc tại chỗ lấy độ sáng; không lưu, không gửi đi đâu. App không gọi mạng ngoài.
