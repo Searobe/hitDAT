@@ -100,9 +100,12 @@ svg.chart text { fill: var(--dim); font-size: 11px; }
 svg.fig { width: 100%; max-width: 340px; height: auto; display: block; margin: 0 auto; }
 svg.fig .ground { stroke: var(--line); stroke-width: 2; stroke-linecap: round; }
 svg.fig .floor { fill: var(--line); opacity: .35; }
-svg.fig .limb { fill: #c9ced6; stroke: rgba(0, 0, 0, .28); stroke-width: .8; stroke-linejoin: round; }
-svg.fig .limb.far { fill: #8a919b; }
-svg.fig .headc { fill: #c9ced6; stroke: rgba(0, 0, 0, .28); stroke-width: .8; }
+svg.fig .ol { fill: #14171c; stroke: #14171c; stroke-width: 2.2; stroke-linejoin: round; }
+svg.fig .cue { fill: none; stroke: #ffffff; stroke-opacity: .55; stroke-width: 1.2; stroke-dasharray: 3 2.5; stroke-linecap: round; stroke-linejoin: round; }
+svg.fig .ol.leg { stroke-width: 1.5; }
+svg.fig .ol.arm { stroke-width: 1.3; }
+svg.fig .sk { fill: #d3d7de; }
+svg.fig .sk.far { fill: #959ca7; }
 .pad .fig { max-height: 30vh; width: auto; }
 .pad .num.mid { font-size: min(34vw, 26vh); }
 .guide-ex { padding: 14px 0; border-top: 1px solid var(--line); }
@@ -113,12 +116,13 @@ ul.tight li { margin: 4px 0; }
 
 /* Vùng cơ được tác động: đỏ = cơ chính, vàng = cơ phụ, xanh = cơ được kéo giãn */
 :root { --mus-main: #ff453a; --mus-extra: #ffb340; --mus-stretch: #40c8e0; }
-svg.fig .mus { stroke-width: .9; stroke-linejoin: round; }
+svg.fig .mus { stroke-width: .8; stroke-linejoin: round; }
 svg.fig .mus.main { fill: var(--mus-main); stroke: var(--mus-main); }
 svg.fig .mus.extra { fill: var(--mus-extra); stroke: var(--mus-extra); }
 svg.fig .mus.stretch { fill: var(--mus-stretch); stroke: var(--mus-stretch); }
-svg.fig .mus.deep { stroke-dasharray: 2.5 1.6; stroke-width: 1.2; fill-opacity: .55; }
-svg.fig .musl { fill: none; stroke: #fff; stroke-opacity: .85; stroke-width: 1; stroke-linecap: round; stroke-dasharray: 4 3; }
+svg.fig .mus.deep { stroke-dasharray: 2.5 1.6; stroke-width: 1.1; }
+svg.fig .musl { fill: none; stroke: #2a0d0d; stroke-width: .7; stroke-linecap: round; stroke-linejoin: round; }
+svg.fig .musl.stretch { stroke: #06323a; stroke-dasharray: 4 2.5; }
 .mus-list { display: flex; flex-direction: column; gap: 4px; margin: 8px 0; font-size: 14px; }
 .mus-chip { display: flex; align-items: baseline; gap: 6px; }
 .mus-chip i { flex: none; width: 10px; height: 10px; border-radius: 50%; display: inline-block; }

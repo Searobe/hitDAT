@@ -52,7 +52,7 @@ test('mọi động tác trong kế hoạch đều có mô tả và hình', () =
       assert.ok(ex, item.ex);
       assert.ok(ex.how.length >= 2 && ex.avoid);
       assert.ok(FIG[item.ex], `thiếu hình ${item.ex}`);
-      assert.match(figureSvg(item.ex), /^<svg[\s\S]*class="limb[\s\S]*<\/svg>$/);
+      assert.match(figureSvg(item.ex), /^<svg[\s\S]*class="sk[\s\S]*<\/svg>$/);
     }
   }
 });

@@ -12,6 +12,11 @@ Hình tập chân hiện là người que, hai tư thế nội suy thẳng, vùn
 - Giải phẫu và chức năng (nguồn cho tên cơ và động tác nào dùng cơ nào): cơ mông lớn duỗi hông; cơ mông nhỡ giữ vững khung chậu khi chịu tải, dạng hông; cơ hình lê xoay ngoài hông, nằm sâu dưới cơ mông lớn; cơ sinh đôi và cơ dép gập cổ chân (duỗi mũi chân), hai gân hợp thành gân gót; cơ chày trước kéo mũi chân về phía mặt; nhóm đùi sau gồm cơ nhị đầu đùi, bán gân, bán màng (https://www.rdlfitness.com/blog/lower-body-core-muscle-anatomy, https://wisc.pb.unizin.org/virtualhumananatomylabmanual/?p=80, https://ecampusontario.pressbooks.pub/cambriananatomyphys2e1msk/?p=391). Cơ tứ đầu đùi: lượt tra này chưa ra nguồn riêng; sẽ tra thêm khi làm, không có nguồn thì dòng đó giữ nguyên như kế hoạch cũ (nguồn ngồi xổm ở docs/ke-hoach/2026-11-14-tap-chan.md), không thêm lời mới.
 - Kỹ thuật vẽ chuyển động bằng SVG: SMIL mặc định nội suy thẳng; muốn mượt phải dùng `calcMode="spline"` kèm `keyTimes`, `keySplines` (https://developer.mozilla.org/en-US/docs/Web/SVG/Guides/SVG_animation_with_SMIL, https://www.quackit.com/svg/animations/tutorial/svg_smil_animateTransform.cfm). Ghi chú của nguồn: ghép nhiều chỉ thị dễ lỗi, phải thử trên trình duyệt đích. Giới hạn: chưa thử Safari iOS thật.
 
+- Làm lại lần hai (hình lần đầu mới là «người nộm + cục màu», chưa theo giải phẫu), tra thêm:
+  - Gốc – bám tận và hướng sợi cơ, theo Gray's Anatomy bản 1918 (phạm vi công cộng): cơ mông lớn từ xương cánh chậu, xương cùng, xương cụt tới dải chậu chày và củ mông xương đùi, sợi chạy chếch xuống ngoài; cơ mông nhỡ toả hình quạt từ mặt ngoài xương cánh chậu tới mấu chuyển lớn; cơ hình lê từ mặt trong xương cùng tới bờ trên mấu chuyển lớn (https://www.hithera.com/grays-anatomy/index-7/index-7-3/index-7-2/muscles_of_the_gluteal_region/). Cơ sinh đôi bắt từ hai lồi cầu xương đùi, cơ dép từ xương chày và xương mác, hai cơ cùng đổ vào gân gót; cơ chày trước từ xương chày tới xương chêm trong; cơ thẳng đùi từ gai chậu trước dưới; nhóm đùi sau từ ụ ngồi (https://uen.pressbooks.pub/anatomyphysiology/chapter/lower-extremity-muscles/, https://wikimsk.org/wiki/Gastrocnemius). Nguồn lệch nhau ở chỗ gốc cơ sinh đôi ghi «lồi cầu» hay «đầu dưới xương đùi»: dùng «lồi cầu».
+  - Hoạ pháp: đùi dựng như khối tròn, gối vuông, bắp chân hình nêm ở phía sau, phía trước cẳng chân gần như không có cơ (Bridgman); khung tỉ lệ ≈ 7,5 đầu của Loomis (https://www.proko.com/human-figure-proportions-average-richer). Chưa đọc trực tiếp sách, chỉ đọc bản tóm lược; con số tỉ lệ trong mã là xấp xỉ, không phải số đo từ sách.
+  - Áp dụng: bộ xương chuẩn độ dài không đổi (thân 38, cổ 17, đùi 30, cẳng 28, bàn chân 19, cánh tay 23, cẳng tay 21), chân tay giải bằng động học ngược để bàn chân bám sàn và tay bám tường / đùi; đường viền mỗi đoạn theo bề dày thật; mỗi bó cơ vẽ theo hình gốc – bám tận, có sợi cơ; da phồng lên khi cơ co.
+
 ## Cách đã loại
 
 - Ảnh / video / hình giải phẫu có sẵn: vướng bản quyền, nặng, cần mạng.
@@ -39,14 +44,15 @@ Hình tập chân hiện là người que, hai tư thế nội suy thẳng, vùn
 
 - `npm test` xanh (35 ca, 7 ca mới ở `test/figures.test.js`).
 - Trình duyệt giả lập iPhone: chụp 9 động tác ở 4–6 pha, chạy bài bơm máu qua màn giới thiệu và màn đếm, tạm dừng giữ nguyên hình, tiếp tục chạy lại, không lỗi hay cảnh báo console.
-- Hình đã đổi sang tư thế 3/4 cho «mở gối» (hai gót chạm nhau, gối trên mở ra, chữ V rõ) và «số 4» (mắt cá gác lên gối chân kia, vùng mông tô xanh có sọc).
+- Góc nhìn «từ trên cao phía trước» cho «mở gối» (gối hướng về người xem, hai gót chạm nhau, gối trên mở lên thành chữ V, có mũi tên gợi hướng) và «số 4» (chân dưới co gối, mắt cá gác lên gối đó, gối chân gác đổ ra phía người xem; vùng mông tô xanh có sọc).
 - Chưa thử trên iPhone thật: độ mượt, mức dùng pin, thang màu trên màn thật.
 
 ## Giới hạn
 
 - Vẫn là hình minh hoạ 2 chiều, không phải tranh giải phẫu; hình dạng bó cơ là đơn giản hoá.
 - Không đo được độ giống người thật bằng test, chỉ bằng mắt qua ảnh chụp; có thể cần chỉnh thêm sau khi có người xem trên máy thật.
-- «Số 4» và «mở gối» đọc được nhưng vẫn là hình nhỏ; chân gác trong «số 4» nhìn hơi dài so với thật. Chưa làm khung phóng to vùng mông như đã dự kiến, vì sọc xanh trên vùng mông đã đủ báo vùng đang giãn.
+- «Mở gối» đọc được ở độ phóng lớn; trên màn nhỏ phần chữ V vẫn khá bé. «Số 4» đọc được nhưng chân gác và tay ôm đùi chồng lên nhau ở góc nhìn này. Chưa làm khung phóng to vùng mông như đã dự kiến. Hình vẫn là hình 2 chiều có chiếu xiên, không phải mô hình 3D.
+- Cơ nằm sâu (mông lớn, cơ hình lê khi nằm ngửa) được vẽ xuyên qua da như lớp trong suốt, vì ở tư thế nằm chúng nằm phía dưới người.
 - Cơ tứ đầu đùi vẫn chưa có nguồn giải phẫu riêng; dòng chữ về cơ này giữ nguyên như kế hoạch cũ.
 - App hướng dẫn vận động, không chẩn đoán.
 
