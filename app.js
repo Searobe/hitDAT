@@ -94,6 +94,12 @@ function say(n) {
     return true;
   } catch { return false; }
 }
+// Đếm ngược từng giây: đọc số nếu chọn giọng đọc, không thì bíp.
+function soundTick(left) {
+  if (!state.settings.sound) return;
+  if (state.settings.count === 'voice' && say(left)) return;
+  beep(660, 120);
+}
 // Âm báo mỗi lượt: bíp, hoặc đọc con số đang hiện trên màn hình.
 function soundRep(shown) {
   if (!state.settings.sound) return;
@@ -420,7 +426,7 @@ function countdown(sec, done, label = 'Vào tư thế chống tay', onTick) {
     left -= 1;
     if (onTick) onTick(left);
     if (left <= 0) { clearTimers(); beep(1320, 220); done(); return; }
-    beep(660, 60);
+    soundTick(left);
     draw();
   }, 1000);
 }
@@ -572,7 +578,9 @@ function rest(sec) {
   every(() => {
     left -= 1;
     if (left <= 0) { clearTimers(); beep(1320, 220); beginSet(); return; }
-    if (left <= 3) beep(660, 60);
+    // Sắp hết giờ nghỉ: hai tiếng bíp báo trước ở giây 10, rồi đếm ngược 5 giây cuối.
+    if (left === 10) { beep(660, 120); beep(660, 120, 0.5, 200); }
+    if (left <= 5) soundTick(left);
     draw();
   }, 1000);
 }
