@@ -153,7 +153,7 @@ function viewHome() {
 
   render(`
     <h1>Hít Đất 100</h1>
-    <p class="dim small">${state.achieved ? '🏆 Anh đã hít được ' + GOAL + ' cái một hơi. Tập tiếp để giữ phong độ.' : 'Mục tiêu: ' + GOAL + ' cái một hơi.'}</p>
+    <p class="dim small">${state.achieved ? '🏆 Bạn đã hít được ' + GOAL + ' cái một hơi. Tập tiếp để giữ phong độ.' : 'Mục tiêu: ' + GOAL + ' cái một hơi.'}</p>
 
     <div class="card">
       <div class="row">
@@ -257,7 +257,7 @@ function exportData() {
 function viewWelcome() {
   render(`
     <h1>Hít Đất 100</h1>
-    <p class="dim">Từ mức hiện tại của anh tới 100 cái một hơi.</p>
+    <p class="dim">Từ mức hiện tại của bạn tới 100 cái một hơi.</p>
     <div class="card">
       <b>Cách chương trình chạy</b>
       <ol class="steps">
@@ -335,7 +335,7 @@ async function viewPrep(note = '') {
       <div class="card">
         <b>${wantCam ? 'Đếm bằng camera trước' : 'Đếm bằng chạm màn hình'}</b>
         <p class="dim small">${wantCam
-          ? 'Đặt máy nằm ngửa dưới ngực. Trước khi tập cần hiệu chỉnh khoảng 8 giây để máy biết tư thế cao và thấp trong ánh sáng chỗ anh. Chạm màn hình vẫn tính lượt.'
+          ? 'Đặt máy nằm ngửa dưới ngực. Trước khi tập cần hiệu chỉnh khoảng 8 giây để máy biết tư thế cao và thấp trong ánh sáng nơi tập. Chạm màn hình vẫn tính lượt.'
           : 'Đặt máy nằm ngửa dưới mặt. Mỗi lần hạ xuống, chạm mũi hoặc cằm vào màn hình.'}</p>
       </div>
     </div>
@@ -355,7 +355,7 @@ async function viewPrep(note = '') {
 async function openCamera() {
   const ok = await camera.start();
   if (!ok) {
-    viewPrep('Không mở được camera (chưa cấp quyền hoặc máy không hỗ trợ). Anh bấm «Buổi này chỉ dùng chạm», hoặc cấp quyền camera cho trang rồi thử lại.');
+    viewPrep('Không mở được camera (chưa cấp quyền hoặc máy không hỗ trợ). Hãy bấm «Buổi này chỉ dùng chạm», hoặc cấp quyền camera cho trang rồi thử lại.');
   }
   return ok;
 }
@@ -399,7 +399,7 @@ function calibrate() {
         if (!c) {
           camera.stop();
           state.calib = null; save();
-          viewPrep('Camera không phân biệt được tư thế cao và thấp ở chỗ này (thiếu sáng, hoặc máy đặt lệch khỏi ngực). Anh chỉnh lại chỗ đặt máy rồi hiệu chỉnh lại, hoặc dùng chạm cho buổi này.');
+          viewPrep('Camera không phân biệt được tư thế cao và thấp ở chỗ này (thiếu sáng, hoặc máy đặt lệch khỏi ngực). Hãy chỉnh lại chỗ đặt máy rồi hiệu chỉnh lại, hoặc dùng chạm cho buổi này.');
           return;
         }
         state.calib = { feature: c.feature, up: c.up, down: c.down }; save();
@@ -547,7 +547,7 @@ function finishWorkout() {
       <h1>${reached ? '🏆 Về đích!' : 'Kết quả bài thử'}</h1>
       <div class="card"><div class="dim small">Một hơi</div><div class="big">${n}</div>
         <p class="dim small" style="margin-bottom:0">${reached
-          ? `Anh đã hít ${n} cái một hơi${wasAchieved ? '' : ' — đạt mục tiêu ' + GOAL}.`
+          ? `Bạn đã hít ${n} cái một hơi${wasAchieved ? '' : ' — đạt mục tiêu ' + GOAL}.`
           : n < 3 ? 'Mức tập đặt ở 3. Nếu chưa lên nổi, tập kiểu quỳ gối trong các buổi tới.'
           : `Mức tập mới: ${state.T}${before != null ? ` (trước đó ${before})` : ''}.`}</p></div>
       <div class="card"><b>Buổi kế: ${fmtDate(state.nextDate)}</b>

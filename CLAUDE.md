@@ -22,4 +22,4 @@ App tập hít đất: thử sức → lên lịch → đếm lượt, mục ti�
 - Đổi hình dạng dữ liệu lưu thì tăng `v` và viết bước chuyển đổi; không làm mất lịch sử tập của người dùng.
 - Hình camera chỉ đọc tại chỗ lấy độ sáng; không lưu, không gửi đi đâu. App không gọi mạng ngoài.
 - Camera chỉ chạy trên HTTPS hoặc localhost. Không thử được camera thật trong phiên đám mây — mọi thay đổi phần đếm phải ghi rõ «chưa thử trên iPhone thật» cho tới khi có người thử trên máy thật.
-- Chữ trên giao diện: tiếng Việt, xưng «anh».
+- Chữ trên giao diện: tiếng Việt, trung tính như app cho mọi người dùng: gọi «bạn» hoặc không xưng hô.
