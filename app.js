@@ -6,7 +6,7 @@ import {
 import {
   EX, FEEL, legsLevel, legsPlan, pumpPlan, buildSteps, estimateMinutes, legsDone, doneOn, describe,
 } from './legs.js';
-import { figureSvg } from './figures.js';
+import { figureSvg, startFigures, pauseFigure } from './figures.js';
 
 const KEY = 'hitdat.v1';
 const $app = document.getElementById('app');
@@ -169,6 +169,7 @@ const CREDIT = '<footer class="credit">Made by Searobe · © 2026</footer>';
 function render(html) {
   $app.innerHTML = html;
   window.scrollTo(0, 0);
+  startFigures($app);
 }
 function on(id, fn) {
   const el = document.getElementById(id);
@@ -506,7 +507,7 @@ function legsWork(st, top) {
     legs.paused = !legs.paused;
     document.getElementById('pause').textContent = legs.paused ? 'Tiếp tục' : 'Tạm dừng';
     const svg = document.querySelector('.pad svg.fig');
-    if (svg) legs.paused ? svg.pauseAnimations() : svg.unpauseAnimations();
+    if (svg) pauseFigure(svg, legs.paused);
   });
   legs.paused = false;
   every(() => {
@@ -627,6 +628,7 @@ function stage(inner, { quit = true, top = '' } = {}) {
     <div class="top">${quit ? '<button id="quit" class="ghost">✕ Thoát</button>' : '<span></span>'}<span class="dim small">${top}</span></div>
     ${inner}
   </div>`;
+  startFigures($app);
   on('quit', () => { if (confirm('Thoát buổi này? Kết quả dở dang sẽ không được ghi.')) endWorkout(); });
 }
 
