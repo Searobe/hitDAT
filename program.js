@@ -45,7 +45,7 @@ export function addDays(dateStr, n) {
 export function initialState() {
   return {
     v: 1,
-    settings: { mode: 'camera', sound: true },
+    settings: { mode: 'camera', sound: true, count: 'beep' }, // count: 'beep' | 'voice'
     calib: null,
     T: null, // mức tối đa đang dùng để tính hiệp
     week: 1,

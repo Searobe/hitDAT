@@ -46,22 +46,59 @@ const DAY_NAME = ['Buổi nhẹ', 'Buổi vừa', 'Buổi nặng'];
 let actx = null;
 function unlockAudio() {
   try {
+    // iOS: mặc định âm thanh web bị tắt theo cần gạt im lặng; kiểu «playback» cho kêu như app nghe nhạc.
+    if (navigator.audioSession) navigator.audioSession.type = 'playback';
+  } catch {}
+  try {
     actx = actx || new (window.AudioContext || window.webkitAudioContext)();
     if (actx.state === 'suspended') actx.resume();
   } catch {}
+  try {
+    // Mở khoá giọng đọc ngay trong lần chạm của người dùng (iOS chỉ cho đọc sau một lần chạm).
+    if (state.settings.count === 'voice' && window.speechSynthesis) {
+      const u = new SpeechSynthesisUtterance(' ');
+      u.volume = 0;
+      speechSynthesis.speak(u);
+    }
+  } catch {}
 }
-function beep(freq = 880, ms = 70, vol = 0.25) {
+// Một nốt: tần số, độ dài (ms), âm lượng, trễ bao lâu mới kêu (ms).
+function beep(freq = 880, ms = 110, vol = 0.5, delay = 0) {
   if (!state.settings.sound || !actx) return;
   try {
+    const t0 = actx.currentTime + delay / 1000;
     const o = actx.createOscillator();
     const g = actx.createGain();
     o.frequency.value = freq;
-    g.gain.setValueAtTime(vol, actx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + ms / 1000);
+    g.gain.setValueAtTime(vol, t0);
+    g.gain.exponentialRampToValueAtTime(0.001, t0 + ms / 1000);
     o.connect(g).connect(actx.destination);
-    o.start();
-    o.stop(actx.currentTime + ms / 1000 + 0.02);
+    o.start(t0);
+    o.stop(t0 + ms / 1000 + 0.02);
   } catch {}
+}
+function melody(notes) {
+  let at = 0;
+  for (const [freq, ms] of notes) { beep(freq, ms + 120, 0.5, at); at += ms; }
+}
+const soundSetDone = () => melody([[784, 110], [1047, 110], [1319, 260]]); // xong một hiệp
+const soundFinish = () => melody([[523, 140], [659, 140], [784, 140], [1047, 280], [784, 140], [1047, 520]]); // xong cả bài
+function say(n) {
+  try {
+    if (!window.speechSynthesis) return false;
+    speechSynthesis.cancel(); // hít nhanh thì bỏ số đang đọc dở, đọc số mới
+    const u = new SpeechSynthesisUtterance(String(n));
+    u.lang = 'vi-VN';
+    u.rate = 1.25;
+    speechSynthesis.speak(u);
+    return true;
+  } catch { return false; }
+}
+// Âm báo mỗi lượt: bíp, hoặc đọc con số đang hiện trên màn hình.
+function soundRep(shown) {
+  if (!state.settings.sound) return;
+  if (state.settings.count === 'voice' && say(shown)) return;
+  beep(880);
 }
 
 // ---------- Giữ màn hình sáng ----------
@@ -195,7 +232,8 @@ function viewHome() {
     <div class="card">
       <div class="btns">
         <button id="mode">Cách đếm: ${state.settings.mode === 'camera' ? 'Camera + chạm' : 'Chỉ chạm màn hình'}</button>
-        <button id="sound">Tiếng bíp: ${state.settings.sound ? 'Bật' : 'Tắt'}</button>
+        <button id="sound">Âm thanh: ${state.settings.sound ? 'Bật' : 'Tắt'}</button>
+        <button id="count">Mỗi lượt hít: ${state.settings.count === 'voice' ? 'Đọc số' : 'Tiếng bíp'}</button>
         <button id="retest">Làm bài thử lại ngay</button>
         <button id="export">Sao lưu dữ liệu</button>
         <button id="reset" class="ghost danger">Xoá hết, làm lại từ đầu</button>
@@ -207,7 +245,13 @@ function viewHome() {
   on('go', () => startWorkout(next.type));
   on('retest', () => startWorkout('test'));
   on('mode', () => { state.settings.mode = state.settings.mode === 'camera' ? 'touch' : 'camera'; save(); viewHome(); });
-  on('sound', () => { state.settings.sound = !state.settings.sound; save(); viewHome(); });
+  on('sound', () => { state.settings.sound = !state.settings.sound; save(); unlockAudio(); beep(880); viewHome(); });
+  on('count', () => {
+    state.settings.count = state.settings.count === 'voice' ? 'beep' : 'voice';
+    save(); unlockAudio();
+    if (state.settings.count === 'voice') say(3); else beep(880);
+    viewHome();
+  });
   on('export', exportData);
   on('reset', () => {
     if (confirm('Xoá toàn bộ lịch sử và bắt đầu lại từ bài thử đầu tiên?')) {
@@ -484,7 +528,8 @@ function rep() {
   w.lastHit = now;
   w.count += 1;
   const tgt = target();
-  beep(tgt && w.count === tgt ? 1320 : 880, tgt && w.count === tgt ? 200 : 60);
+  if (tgt && w.count === tgt) soundSetDone(); // số về 0: đủ hiệp
+  else soundRep(tgt ? (w.count < tgt ? tgt - w.count : w.count - tgt) : w.count);
   if (tgt && !isOpenSet() && w.count >= tgt) { finishSet(); return; }
   drawSet();
   const pad = document.getElementById('pad');
@@ -538,6 +583,7 @@ function finishWorkout() {
   keepAwake(false);
   const w = workout;
   w.phase = 'summary';
+  soundFinish();
   const before = state.T;
   const wasAchieved = state.achieved;
   let body;
