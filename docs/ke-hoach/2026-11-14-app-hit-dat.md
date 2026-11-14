@@ -40,6 +40,7 @@ Ngày: 14/11/2026 · Một mốc, một PR · Trạng thái: đã làm, chờ th
 
 - `npm test` xanh (16 ca).
 - Chạy thử bằng trình duyệt giả lập iPhone: bài thử → buổi 5 hiệp → tổng kết, không lỗi; camera giả sáng/tối đếm đúng 7/7.
+- Âm thanh (14/11): bíp to hơn mỗi lượt hoặc đọc số còn lại, nhạc ngắn khi xong hiệp, nhạc mừng khi xong bài; đặt kiểu âm thanh «playback» để kêu cả khi gạt im lặng — chưa thử trên iPhone thật.
 - Chưa kiểm được: camera trên iPhone thật (tự chỉnh độ sáng của máy có thể làm tín hiệu yếu đi), giữ màn hình sáng, tiếng bíp khi bật chế độ im lặng. Cần thử trên máy thật.
 
 ## Giới hạn đã biết

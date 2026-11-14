@@ -1,5 +1,5 @@
 // Chạy không cần mạng: trả bản đã lưu ngay, đồng thời tải bản mới về cho lần mở sau.
-const CACHE = 'hitdat-2';
+const CACHE = 'hitdat-4';
 const FILES = ['./', 'index.html', 'style.css', 'app.js', 'program.js', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-180.png', 'icons/icon-512.png'];
 
 self.addEventListener('install', (e) => {
