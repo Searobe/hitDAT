@@ -31,6 +31,8 @@ test('toạ độ luôn hữu hạn và nằm gần khung hình, chuyển độn
       const P = poseAt(id, ph);
       for (const j of JOINTS) {
         assert.ok(P[j].every(Number.isFinite), `${id}/${j}@${ph}`);
+        // hình cắt (crop) chỉ lấy phần chân; thân và đầu cố ý nằm ngoài khung
+        if (FIG[id].crop && ['head', 'sh', 'el', 'hd'].includes(j)) continue;
         assert.ok(P[j][0] > bx - 20 && P[j][0] < bx + bw + 20 && P[j][1] > by - 20 && P[j][1] < by + bh + 20, `${id}/${j}@${ph} ra ngoài khung`);
         assert.ok(Math.hypot(P[j][0] - prev[j][0], P[j][1] - prev[j][1]) < 14, `${id}/${j}@${ph} nhảy quá xa giữa hai khung`);
       }

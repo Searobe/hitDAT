@@ -50,7 +50,7 @@ const pk = (t, lo, hi, tail = lo) => [[0, lo], [t[0], hi], [t[2], hi], [Math.min
 
 const DEFS = {
   ankle: {
-    box: [76, 94, 122, 46], view: VIEW, front: { th: -1, sh: -1, tr: -1 }, show: 0.7,
+    box: [76, 94, 122, 46], crop: true, view: VIEW, front: { th: -1, sh: -1, tr: -1 }, show: 0.7,
     pose: () => {
       const dz = { k2: -6, a2: -6, t2: -6 };
       const leg = { k1: [127, 128.5], a1: [155, 131], k2: [127, 128.5], a2: [155, 131] };
