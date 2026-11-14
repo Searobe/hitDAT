@@ -165,7 +165,9 @@ const camera = {
 };
 
 // ---------- Trang chính ----------
-const CREDIT = '<footer class="credit">Made by Searobe · © 2026</footer>';
+// Số bản: tăng cùng lúc với CACHE trong sw.js. Hiện ở chân trang để biết máy đang chạy bản nào.
+const VERSION = 7;
+const CREDIT = `<footer class="credit">Made by Searobe · © 2026 · v${VERSION}</footer>`;
 function render(html) {
   $app.innerHTML = html;
   window.scrollTo(0, 0);
@@ -905,6 +907,21 @@ document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible' && workout && workout.phase !== 'summary') keepAwake(true);
 });
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  navigator.serviceWorker.register('sw.js').catch(() => {});
+  const idle = () => !workout || workout.phase === 'summary';
+  let pendingReload = false;
+  // Bản mới vừa nhận quyền điều khiển trang: tải lại để dùng ngay, trừ khi đang giữa buổi tập.
+  const hadController = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadController) return; // lần cài đầu tiên, trang đang mở đã là bản mới
+    if (idle()) location.reload(); else pendingReload = true;
+  });
+  navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then((reg) => {
+    // App ghim ở màn hình chính thường chỉ được «đánh thức» chứ không tải lại: mỗi lần hiện lên thì hỏi bản mới.
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState !== 'visible') return;
+      if (pendingReload && idle()) { location.reload(); return; }
+      reg.update().catch(() => {});
+    });
+  }).catch(() => {});
 }
 viewHome();
