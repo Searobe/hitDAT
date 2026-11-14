@@ -74,7 +74,8 @@ test('hình vẽ: có thân khối, từng bó cơ có hình riêng, cơ giãn c
       assert.ok(!JSON.stringify(ops).match(/NaN|Infinity|undefined/), `${id}@${ph}`);
       assert.ok(ops.filter((o) => o.cls.startsWith('sk')).length >= 8 && ops.every((o) => !o.a.d || o.a.d.length > 0), `${id}: thiếu thân khối`);
       for (const lvl of new Set(FIG[id].mus.map((m) => m.lvl))) assert.ok(ops.some((o) => o.cls.startsWith(`mus ${lvl}`)), `${id}: thiếu cơ ${lvl}`);
-      assert.equal(ops.filter((o) => o.cls.startsWith('mus ')).length, FIG[id].mus.length, id);
+      assert.ok(ops.filter((o) => /^mus (main|extra|stretch)/.test(o.cls)).length >= FIG[id].mus.length, `${id}: mỗi cơ cần ít nhất một đầu cơ`);
+      assert.ok(ops.filter((o) => o.cls.startsWith('bone')).length >= 8, `${id}: thiếu khung xương`);
     }
     const svg = figureSvg(id, 2);
     assert.match(svg, new RegExp(`data-fig="${id}"`));
@@ -119,5 +120,12 @@ test('mỗi bó cơ có tên giải phẫu và nằm trong danh sách tên cơ c
       if (m.id === 'gmax' && m.lvl === 'stretch') assert.match(text, /mông/);
       else assert.match(text, new RegExp(key[m.id]), `${id}: ${m.id} không có trong tên cơ`);
     }
+  }
+});
+
+test('số phần tử và thứ tự lớp vẽ không đổi giữa các pha (app chỉ cập nhật thuộc tính)', () => {
+  for (const id of IDS) {
+    const sig = (ph) => frameOps(id, ph).map((o) => `${o.tag}:${o.cls.split(' ')[0]}`).join(',');
+    for (const ph of [0.2, 0.5, 0.8]) assert.equal(sig(ph), sig(0), id);
   }
 });
