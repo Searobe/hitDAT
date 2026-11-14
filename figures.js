@@ -275,6 +275,16 @@ function smooth(pts) {
   }
   return `${d}Z`;
 }
+// Đường cong hở Catmull-Rom → Bézier (cho nét viền không khép kín).
+function smoothOpen(pts) {
+  const n = pts.length;
+  let d = `M${r1(pts[0][0])} ${r1(pts[0][1])}`;
+  for (let i = 0; i < n - 1; i++) {
+    const p0 = pts[Math.max(0, i - 1)], p1 = pts[i], p2 = pts[i + 1], p3 = pts[Math.min(n - 1, i + 2)];
+    d += `C${r1(p1[0] + (p2[0] - p0[0]) / 6)} ${r1(p1[1] + (p2[1] - p0[1]) / 6)} ${r1(p2[0] - (p3[0] - p1[0]) / 6)} ${r1(p2[1] - (p3[1] - p1[1]) / 6)} ${r1(p2[0])} ${r1(p2[1])}`;
+  }
+  return d;
+}
 // Khung toạ độ của một đoạn: P → Q, F = hướng "phía trước" (đơn vị) theo dấu sf.
 function frame(P, Q, sf) {
   const [dx, dy] = unit(P, Q);
@@ -294,7 +304,9 @@ function limb(fr, key, bumps = []) {
     front.push(at(fr, u, wf(u)));
     back.push(at(fr, u, -wb(u)));
   }
-  return { d: smooth([...front, ...back.reverse()]), wf, wb, fr };
+  // nét viền: chỉ hai cạnh bên, bỏ hai đầu khớp để chỗ nối liền mạch, không lộ đường ngang
+  const e = `${smoothOpen(front.slice(1, N))}${smoothOpen(back.slice(1, N))}`;
+  return { d: smooth([...front, ...back.reverse()]), e, wf, wb, fr };
 }
 
 // Bàn chân: gót, vòm, ngón; sàn chân cách tâm cổ chân h, mặt mu chân quay lên trên.
@@ -387,22 +399,23 @@ export function frameOps(id, ph) {
   const fa = limb(frame(P.el, P.hd, 1), 'fa');
   const Ftr = trFr.F;
   const group = (cls, items) => {
-    for (const it of items) ops.push({ tag: 'path', cls: `ol ${cls}`, a: { d: it } });
-    for (const it of items) ops.push({ tag: 'path', cls: `sk ${cls}`, a: { d: it } });
+    for (const it of items) ops.push({ tag: 'path', cls: `ol ${cls}`, a: { d: it.e || it.d || it } });
+    for (const it of items) ops.push({ tag: 'path', cls: `sk ${cls}`, a: { d: it.d || it } });
   };
-  group('far', [th2.d, sh2.d, foot(P.a2, P.t2)]);
-  group('', [trunk.d, headPath(P.head, P.sh, Ftr)]);
-  group('leg', [th1.d, sh1.d, foot(P.a1, P.t1)]);
+  group('far', [th2, sh2, foot(P.a2, P.t2)]);
+  group('', [trunk, headPath(P.head, P.sh, Ftr)]);
+  group('leg', [th1, sh1, foot(P.a1, P.t1)]);
   const pelCtx = { hip: P.hip, dT: trFr.d, bk: [-Ftr[0], -Ftr[1]], thFr: th1.fr, thW: (u, b) => (b >= 0 ? th1.wf(u) : th1.wb(u)) };
   const hostOf = (m) => (MUSC[m.id].pel ? 0 : MUSC[m.id].seg === 'th' ? 1 : 2);
   for (const m of [...f.mus].sort((a, b) => hostOf(a) - hostOf(b))) {
     const def = MUSC[m.id], lvl = m.lvl, v = act[m.id];
     const sh = def.pel ? pelMuscle(def, pelCtx, v, lvl) : segMuscle(def.seg === 'th' ? th1 : sh1, def, v, lvl);
     const op = lvl === 'stretch' ? 0.35 + 0.55 * v : 0.22 + 0.7 * v;
+    ops.push({ tag: 'path', cls: `musg ${lvl}`, a: { d: sh.d, opacity: r1(v * 0.45 * 100) / 100 } });
     ops.push({ tag: 'path', cls: `mus ${lvl}${def.deep ? ' deep' : ''}`, a: { d: sh.d, opacity: r1(op * 100) / 100 } });
     ops.push({ tag: 'path', cls: `musl ${lvl}`, a: { d: sh.d2, 'stroke-dashoffset': r1(-ph * 60), opacity: r1((0.25 + 0.6 * v) * 100) / 100 } });
   }
-  group('arm', [ua.d, fa.d]);
+  group('arm', [ua, { d: fa.d }]);
   return ops;
 }
 
@@ -413,7 +426,7 @@ const attrs = (a) => Object.entries(a).map(([k, v]) => `${k}="${v}"`).join(' ');
 export function figureSvg(id, dur = 2.5) {
   const f = FIG[id];
   if (!f) return '';
-  let out = `<svg class="fig" viewBox="${f.box.join(' ')}" data-fig="${id}" data-dur="${dur}" role="img" aria-label="Hình minh hoạ động tác và nhóm cơ tác động">`;
+  let out = `<svg class="fig" viewBox="${f.box.join(' ')}" data-fig="${id}" data-dur="${dur}" role="img" aria-label="Hình minh hoạ động tác và nhóm cơ tác động"><defs><linearGradient id="fskin" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8f0ff" stop-opacity=".34"/><stop offset="1" stop-color="#9fb4d6" stop-opacity=".07"/></linearGradient><linearGradient id="ffar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9fb4d6" stop-opacity=".16"/><stop offset="1" stop-color="#6f86ad" stop-opacity=".03"/></linearGradient></defs>`;
   const [bx, , bw] = f.box;
   if (f.floor) out += `<rect class="floor" x="${bx + 4}" y="${f.floor[0]}" width="${bw - 8}" height="${f.floor[1] - f.floor[0]}" rx="10"/>`;
   else out += `<line class="ground" x1="${bx + 4}" y1="${GROUND + 5}" x2="${bx + bw - 4}" y2="${GROUND + 5}"/>`;
@@ -437,7 +450,7 @@ const still = () => typeof matchMedia === 'function' && matchMedia('(prefers-red
 
 function paint(svg, s) {
   const ops = frameOps(s.id, wrap(s.t / s.dur));
-  const els = svg.querySelectorAll('.ol, .sk, .mus, .musl');
+  const els = svg.querySelectorAll('.ol, .sk, .musg, .mus, .musl');
   for (let i = 0; i < ops.length && i < els.length; i++) for (const k in ops[i].a) els[i].setAttribute(k, ops[i].a[k]);
 }
 function tick(now) {

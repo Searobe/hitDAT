@@ -47,6 +47,10 @@ Hình tập chân hiện là người que, hai tư thế nội suy thẳng, vùn
 - Góc nhìn «từ trên cao phía trước» cho «mở gối» (gối hướng về người xem, hai gót chạm nhau, gối trên mở lên thành chữ V, có mũi tên gợi hướng) và «số 4» (chân dưới co gối, mắt cá gác lên gối đó, gối chân gác đổ ra phía người xem; vùng mông tô xanh có sọc).
 - Chưa thử trên iPhone thật: độ mượt, mức dùng pin, thang màu trên màn thật.
 
+## Phong cách vẽ
+
+Thân người trong suốt như kính (nền chuyển sắc mờ, chân xa mờ hơn), nét viền mảnh sáng chỉ vẽ hai cạnh bên nên chỗ nối khớp liền mạch; bó cơ phát sáng bên trong, viền sáng và quầng mờ theo mức co, sợi cơ nét trắng mảnh. Không dùng bộ lọc làm mờ để nhẹ máy khi chuyển động.
+
 ## Giới hạn
 
 - Vẫn là hình minh hoạ 2 chiều, không phải tranh giải phẫu; hình dạng bó cơ là đơn giản hoá.
