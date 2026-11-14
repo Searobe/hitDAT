@@ -118,6 +118,7 @@ const camera = {
 };
 
 // ---------- Trang chính ----------
+const CREDIT = '<footer class="credit">Made by Searobe · © 2026</footer>';
 function render(html) {
   $app.innerHTML = html;
   window.scrollTo(0, 0);
@@ -200,6 +201,7 @@ function viewHome() {
         <button id="reset" class="ghost danger">Xoá hết, làm lại từ đầu</button>
       </div>
     </div>
+    ${CREDIT}
   `);
 
   on('go', () => startWorkout(next.type));
@@ -279,6 +281,7 @@ function viewWelcome() {
       <button class="primary" id="go">Làm bài thử đầu tiên</button>
       <button id="mode">Cách đếm: ${state.settings.mode === 'camera' ? 'Camera + chạm' : 'Chỉ chạm màn hình'}</button>
     </div>
+    ${CREDIT}
   `);
   on('go', () => startWorkout('test'));
   on('mode', () => { state.settings.mode = state.settings.mode === 'camera' ? 'touch' : 'camera'; save(); viewWelcome(); });
