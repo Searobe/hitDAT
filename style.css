@@ -1,0 +1,94 @@
+:root {
+  --bg: #101214;
+  --card: #1b1e22;
+  --line: #2c3036;
+  --text: #f2f3f5;
+  --dim: #9aa1ab;
+  --accent: #ff7a1a;
+  --ok: #35c66b;
+  --bad: #ff5a5a;
+  --radius: 16px;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); }
+body {
+  font: 16px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-user-select: none; user-select: none;
+  -webkit-touch-callout: none;
+  overscroll-behavior: none;
+}
+#app {
+  min-height: 100%;
+  max-width: 520px; margin: 0 auto;
+  padding: calc(env(safe-area-inset-top) + 16px) 16px calc(env(safe-area-inset-bottom) + 24px);
+}
+h1 { font-size: 26px; margin: 4px 0 2px; letter-spacing: -0.02em; }
+h2 { font-size: 13px; font-weight: 600; color: var(--dim); text-transform: uppercase; letter-spacing: 0.06em; margin: 24px 0 8px; }
+p { margin: 8px 0; }
+.dim { color: var(--dim); }
+.small { font-size: 14px; }
+.card { background: var(--card); border-radius: var(--radius); padding: 16px; margin: 12px 0; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.big { font-size: 44px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+.pill { display: inline-block; padding: 2px 10px; border-radius: 99px; font-size: 13px; background: var(--line); color: var(--dim); }
+.pill.ok { background: rgba(53,198,107,.16); color: var(--ok); }
+.pill.bad { background: rgba(255,90,90,.16); color: var(--bad); }
+.pill.now { background: rgba(255,122,26,.18); color: var(--accent); }
+
+button {
+  font: inherit; color: var(--text); background: var(--line);
+  border: 0; border-radius: 14px; padding: 14px 18px; min-height: 52px;
+  width: 100%; font-weight: 600; cursor: pointer;
+}
+button.primary { background: var(--accent); color: #1a0d00; font-size: 18px; }
+button.ghost { background: transparent; color: var(--dim); min-height: 44px; }
+button.danger { color: var(--bad); }
+button:active { filter: brightness(1.15); }
+.btns { display: grid; gap: 10px; margin-top: 12px; }
+.btns.two { grid-template-columns: 1fr 1fr; }
+
+.sets { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.sets span {
+  min-width: 44px; text-align: center; padding: 6px 8px; border-radius: 10px;
+  background: var(--line); font-weight: 700; font-variant-numeric: tabular-nums;
+}
+.sets span.done { background: rgba(53,198,107,.18); color: var(--ok); }
+.sets span.miss { background: rgba(255,90,90,.16); color: var(--bad); }
+.sets span.cur { outline: 2px solid var(--accent); }
+
+.list > div { padding: 12px 0; border-top: 1px solid var(--line); }
+.list > div:first-child { border-top: 0; }
+
+.bar { height: 8px; background: var(--line); border-radius: 99px; overflow: hidden; margin-top: 10px; }
+.bar > i { display: block; height: 100%; background: var(--accent); border-radius: 99px; }
+
+ol.steps { padding-left: 20px; margin: 8px 0; }
+ol.steps li { margin: 6px 0; }
+
+/* Màn tập: phủ kín, chữ số thật to để nhìn từ tư thế chống tay */
+.stage {
+  position: fixed; inset: 0; background: var(--bg);
+  display: flex; flex-direction: column;
+  padding: calc(env(safe-area-inset-top) + 10px) 14px calc(env(safe-area-inset-bottom) + 14px);
+  touch-action: none;
+}
+.stage .top { display: flex; justify-content: space-between; align-items: center; min-height: 44px; }
+.stage .top button { width: auto; min-height: 40px; padding: 8px 14px; }
+.pad {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  border-radius: 28px; background: var(--card); margin: 10px 0; text-align: center;
+  transition: background .12s;
+}
+.pad.hit { background: #3a2412; }
+.pad.rest { background: #14212b; }
+.pad .num { font-size: min(46vw, 40vh); font-weight: 800; line-height: .95; font-variant-numeric: tabular-nums; letter-spacing: -0.04em; }
+.pad .num.plus { color: var(--ok); }
+.pad .lbl { font-size: 20px; color: var(--dim); padding: 0 20px; }
+.pad .hint { font-size: 15px; color: var(--dim); margin-top: 10px; padding: 0 24px; }
+.sig { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--dim); }
+.sig i { width: 12px; height: 12px; border-radius: 50%; background: var(--line); display: inline-block; }
+.sig i.up { background: var(--ok); }
+.sig i.down { background: var(--accent); }
+
+svg.chart { width: 100%; height: auto; display: block; }
+svg.chart text { fill: var(--dim); font-size: 11px; }
