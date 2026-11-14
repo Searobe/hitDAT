@@ -92,3 +92,5 @@ ol.steps li { margin: 6px 0; }
 
 svg.chart { width: 100%; height: auto; display: block; }
 svg.chart text { fill: var(--dim); font-size: 11px; }
+
+.credit { margin-top: 28px; text-align: center; font-size: 12px; color: var(--dim); opacity: .7; }
