@@ -383,6 +383,10 @@ function bindLegs() {
   on('guide', viewGuide);
 }
 
+const MUS_LABEL = { main: 'Cơ chính', extra: 'Cơ phụ', stretch: 'Kéo giãn' };
+function musclesHtml(id) {
+  return `<div class="mus-list">${EX[id].muscles.map(([lvl, name]) => `<span class="mus-chip ${lvl}"><i></i><b>${MUS_LABEL[lvl]}:</b> ${name}</span>`).join('')}</div>`;
+}
 function viewGuide() {
   const ids = ['ankle', 'calf', 'bridge', 'clam', 'squat', 'fig4', 'calf1', 'bridge1', 'split'];
   render(`
@@ -392,6 +396,7 @@ function viewGuide() {
       ${ids.map((id, i) => `<div class="guide-ex">
         <b>${EX[id].name}</b>${i >= 6 ? ' <span class="pill">mức 3</span>' : ''}
         ${figureSvg(id, EX[id].tempo || 4)}
+        ${musclesHtml(id)}
         <ul class="tight small">${EX[id].how.map((x) => `<li>${x}</li>`).join('')}</ul>
         <p class="dim small" style="margin:0">${EX[id].avoid}</p>
       </div>`).join('')}
@@ -459,6 +464,7 @@ function legsIntro(st, top) {
         <h1>${ex.name}</h1>
         <p class="dim small">${describe(st)}</p>
         ${figureSvg(st.ex, ex.tempo || 4)}
+        ${musclesHtml(st.ex)}
         <ul class="tight">${ex.how.map((x) => `<li>${x}</li>`).join('')}</ul>
         <p class="dim small">${ex.avoid}</p>
       </div>
@@ -489,7 +495,7 @@ function legsWork(st, top) {
       <div class="lbl">${lbl}</div>
       ${figureSvg(st.ex, hold ? 4 : ex.tempo)}
       <div class="num mid" id="num">${left}</div>
-      <div class="hint">${hold ? 'Giữ yên, thở đều' : 'Mỗi tiếng báo là một lượt'}</div>
+      <div class="hint">${ex.muscles.map((m) => m[1].replace(/ \(.*\)/, '')).join(' · ')}</div>
     </div>
     <div class="btns two">
       <button id="pause">Tạm dừng</button>

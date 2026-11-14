@@ -74,3 +74,13 @@ test('mô tả liều tập', () => {
   assert.equal(describe({ ex: 'fig4', sets: 1, n: 30 }), '30 giây mỗi bên');
   assert.equal(describe({ ex: 'ankle', sets: 1, n: 20 }), '20 lượt');
 });
+
+test('mỗi động tác có tên nhóm cơ và hình tô đúng các mức cơ đó', () => {
+  for (const id of Object.keys(FIG)) {
+    const levels = new Set(EX[id].muscles.map((m) => m[0]));
+    assert.ok(levels.size >= 1, id);
+    const svg = figureSvg(id);
+    for (const lvl of levels) assert.ok(svg.includes(`class="mus ${lvl}"`), `${id} thiếu vùng cơ ${lvl} trên hình`);
+    for (const m of FIG[id].m) assert.ok(levels.has(m.lvl), `${id}: hình tô ${m.lvl} nhưng không có tên`);
+  }
+});

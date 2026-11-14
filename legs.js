@@ -8,49 +8,59 @@ export const SESSIONS_PER_LEVEL = 6; // 3 buổi/tuần × 2 tuần
 
 // kind: 'reps' đếm lượt theo nhịp tempo (giây mỗi lượt) · 'hold' giữ yên, đếm giây.
 // sides: 2 = làm từng bên.
+// muscles: [mức, tên] — main = cơ chính, extra = cơ phụ, stretch = cơ được kéo giãn; màu khớp với hình ở figures.js.
 export const EX = {
   ankle: {
     name: 'Gập duỗi cổ chân', kind: 'reps', tempo: 2, sides: 1,
+    muscles: [['main', 'Bắp chân (cơ sinh đôi, cơ dép)'], ['extra', 'Cơ chày trước (mặt trước ống chân)']],
     how: ['Nằm ngửa hoặc ngồi duỗi thẳng chân.', 'Kéo mũi chân về phía mặt hết cỡ, rồi duỗi mũi chân ra xa hết cỡ.', 'Làm mạnh và dứt khoát, cả hai chân cùng lúc.'],
     avoid: 'Đừng làm hời hợt: phải thấy bắp chân căng rồi thả.',
   },
   calf: {
     name: 'Nhón gót', kind: 'reps', tempo: 2, sides: 1,
+    muscles: [['main', 'Bắp chân (cơ sinh đôi, cơ dép)']],
     how: ['Đứng thẳng, tay vịn tường hoặc ghế.', 'Nhón gót lên cao hết cỡ, giữ một nhịp.', 'Hạ chậm xuống, gót chạm đất.'],
     avoid: 'Đừng nhún nhanh như lò xo; đừng đổ người về trước.',
   },
   bridge: {
     name: 'Nâng hông', kind: 'reps', tempo: 3, sides: 1,
+    muscles: [['main', 'Cơ mông lớn'], ['extra', 'Cơ đùi sau']],
     how: ['Nằm ngửa, co gối, bàn chân đặt sát đất rộng bằng hông.', 'Siết mông, đẩy hông lên tới khi vai – hông – gối thẳng hàng.', 'Giữ một nhịp rồi hạ chậm.'],
     avoid: 'Đừng ưỡn lưng để lên cao hơn; lực phải ở mông, không ở thắt lưng.',
   },
   clam: {
     name: 'Mở gối nằm nghiêng', kind: 'reps', tempo: 2.5, sides: 2,
+    muscles: [['main', 'Cơ mông nhỡ (bên hông)']],
     how: ['Nằm nghiêng, co gối, hai bàn chân chụm vào nhau.', 'Giữ bàn chân chạm nhau, mở gối trên lên như vỏ sò mở ra.', 'Hạ chậm. Sẽ thấy mỏi ở bên hông và mông.'],
     avoid: 'Đừng ngả hông ra sau khi mở gối; thân người giữ yên.',
   },
   squat: {
     name: 'Ngồi xổm', kind: 'reps', tempo: 3, sides: 1,
+    muscles: [['main', 'Cơ tứ đầu đùi (đùi trước)'], ['main', 'Cơ mông lớn'], ['extra', 'Cơ đùi sau']],
     how: ['Đứng chân rộng bằng vai, mũi chân hơi mở.', 'Đẩy mông ra sau như ngồi xuống ghế, hạ tới khi đùi gần song song mặt đất.', 'Đạp gót đứng thẳng dậy.'],
     avoid: 'Đừng để gối chụm vào trong; gót không nhấc khỏi đất.',
   },
   fig4: {
     name: 'Giãn cơ mông hình số 4', kind: 'hold', sides: 2,
+    muscles: [['stretch', 'Cơ mông và cơ hình lê (được kéo giãn)']],
     how: ['Nằm ngửa, gác mắt cá chân này lên gối chân kia thành hình số 4.', 'Luồn tay ôm đùi chân dưới, kéo nhẹ về phía ngực.', 'Thở đều, thấy căng ở mông bên chân gác.'],
     avoid: 'Căng vừa phải, không đau nhói. Tê hoặc đau chạy dọc chân thì nới ra.',
   },
   calf1: {
     name: 'Nhón gót một chân', kind: 'reps', tempo: 2.5, sides: 2,
+    muscles: [['main', 'Bắp chân (cơ sinh đôi, cơ dép)']],
     how: ['Đứng một chân, tay vịn tường hoặc ghế, chân kia co lên.', 'Nhón gót lên cao hết cỡ, giữ một nhịp.', 'Hạ chậm xuống.'],
     avoid: 'Đừng dùng tay kéo người lên; tay chỉ để giữ thăng bằng.',
   },
   bridge1: {
     name: 'Nâng hông một chân', kind: 'reps', tempo: 3, sides: 2,
+    muscles: [['main', 'Cơ mông lớn'], ['extra', 'Cơ đùi sau']],
     how: ['Nằm ngửa, co một gối, chân kia duỗi thẳng nhấc khỏi đất.', 'Siết mông bên chân trụ, đẩy hông lên.', 'Giữ hai bên hông ngang nhau, hạ chậm.'],
     avoid: 'Đừng để hông bên chân duỗi sụp xuống.',
   },
   split: {
     name: 'Chùng chân', kind: 'reps', tempo: 3, sides: 2,
+    muscles: [['main', 'Cơ tứ đầu đùi (đùi trước)'], ['main', 'Cơ mông lớn']],
     how: ['Đứng chân trước chân sau, cách nhau một bước dài.', 'Hạ thẳng người xuống tới khi gối sau gần chạm đất.', 'Đạp chân trước đứng dậy.'],
     avoid: 'Đừng đổ người về trước; gối trước không vượt quá mũi chân nhiều.',
   },

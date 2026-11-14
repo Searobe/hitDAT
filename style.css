@@ -98,11 +98,10 @@ svg.chart text { fill: var(--dim); font-size: 11px; }
 /* Hình người que minh hoạ động tác chân */
 svg.fig { width: 100%; max-width: 340px; height: auto; display: block; margin: 0 auto; }
 svg.fig .ground { stroke: var(--line); stroke-width: 2; stroke-linecap: round; }
-svg.fig .bone { stroke-width: 7; stroke-linecap: round; }
-svg.fig .bone.body { stroke: var(--text); }
+svg.fig .bone { stroke-width: 10; stroke-linecap: round; }
+svg.fig .bone.body { stroke: #c9ced6; }
 svg.fig .bone.far { stroke: #6b727c; }
-svg.fig .bone.near { stroke: var(--accent); }
-svg.fig .headc { fill: var(--text); }
+svg.fig .headc { fill: #c9ced6; }
 .pad .fig { max-height: 30vh; width: auto; }
 .pad .num.mid { font-size: min(34vw, 26vh); }
 .guide-ex { padding: 14px 0; border-top: 1px solid var(--line); }
@@ -110,3 +109,19 @@ svg.fig .headc { fill: var(--text); }
 .guide-ex svg.fig { max-width: 260px; }
 ul.tight { padding-left: 20px; margin: 6px 0; }
 ul.tight li { margin: 4px 0; }
+
+/* Vùng cơ được tác động: đỏ = cơ chính, vàng = cơ phụ, xanh = cơ được kéo giãn */
+:root { --mus-main: #ff453a; --mus-extra: #ffb340; --mus-stretch: #40c8e0; }
+svg.fig .mus { stroke-width: 9; stroke-linecap: round; fill: none; }
+svg.fig .mus.main { stroke: var(--mus-main); }
+svg.fig .mus.extra { stroke: var(--mus-extra); }
+svg.fig circle.mus { stroke: none; }
+svg.fig circle.mus.main { fill: var(--mus-main); }
+svg.fig circle.mus.extra { fill: var(--mus-extra); }
+svg.fig circle.mus.stretch { fill: var(--mus-stretch); }
+.mus-list { display: flex; flex-direction: column; gap: 4px; margin: 8px 0; font-size: 14px; }
+.mus-chip { display: flex; align-items: baseline; gap: 6px; }
+.mus-chip i { flex: none; width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.mus-chip.main i { background: var(--mus-main); }
+.mus-chip.extra i { background: var(--mus-extra); }
+.mus-chip.stretch i { background: var(--mus-stretch); }
