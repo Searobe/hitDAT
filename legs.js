@@ -4,7 +4,7 @@
 export const REST_SET = 30; // nghỉ giữa hai hiệp (giây)
 export const REST_SIDE = 5; // đổi bên
 export const INTRO = 8; // xem hình + chuẩn bị trước mỗi động tác
-export const SESSIONS_PER_LEVEL = 6; // 3 buổi/tuần × 2 tuần
+export const SESSIONS_PER_LEVEL = 6; // số điểm để lên một mức: 6 buổi «vừa» (3 buổi/tuần × 2 tuần)
 
 // kind: 'reps' đếm lượt theo nhịp tempo (giây mỗi lượt) · 'hold' giữ yên, đếm giây.
 // sides: 2 = làm từng bên.
@@ -66,10 +66,29 @@ export const EX = {
   },
 };
 
-export function levelFor(sessionsDone) {
-  if (sessionsDone < SESSIONS_PER_LEVEL) return 1;
-  if (sessionsDone < SESSIONS_PER_LEVEL * 2) return 2;
-  return 3;
+// Mức chân tính từ lịch sử, theo cảm nhận người tập chọn cuối mỗi buổi (feel):
+// «nhẹ» +2 điểm, «vừa» (hoặc buổi cũ chưa có câu hỏi) +1 điểm, «nặng» +0 điểm; đủ 6 điểm lên một mức.
+// Hai buổi «nặng» liền nhau thì lùi về đầu mức dưới.
+export const FEEL = { easy: 'Nhẹ', ok: 'Vừa', hard: 'Nặng' };
+export function legsLevel(history) {
+  let points = 0;
+  let hard = 0;
+  for (const h of history) {
+    if (h.type !== 'legs') continue;
+    if (h.feel === 'hard') {
+      hard += 1;
+      if (hard >= 2) {
+        points = Math.max(0, (Math.floor(points / SESSIONS_PER_LEVEL) - 1) * SESSIONS_PER_LEVEL);
+        hard = 0;
+      }
+    } else {
+      hard = 0;
+      points += h.feel === 'easy' ? 2 : 1;
+    }
+  }
+  points = Math.min(points, SESSIONS_PER_LEVEL * 2);
+  const level = 1 + Math.floor(points / SESSIONS_PER_LEVEL);
+  return { level, points, toNext: level >= 3 ? 0 : SESSIONS_PER_LEVEL - (points % SESSIONS_PER_LEVEL) };
 }
 
 // n = số lượt (reps) hoặc số giây (hold) của một hiệp, mỗi bên.

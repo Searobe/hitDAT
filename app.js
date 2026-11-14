@@ -4,7 +4,7 @@ import {
   sessionPassed, makeRepDetector, chooseCalibration,
 } from './program.js';
 import {
-  EX, levelFor, legsPlan, pumpPlan, buildSteps, estimateMinutes, legsDone, doneOn, describe,
+  EX, FEEL, legsLevel, legsPlan, pumpPlan, buildSteps, estimateMinutes, legsDone, doneOn, describe,
 } from './legs.js';
 import { figureSvg } from './figures.js';
 
@@ -276,7 +276,7 @@ function viewHome() {
 function historyRow(h) {
   if (h.type === 'legs' || h.type === 'pump') {
     return `<div><div class="row"><span>${h.type === 'legs' ? 'Buổi chân · mức ' + h.level : 'Bơm máu bắp chân'}</span><span class="dim small">${fmtPast(h.date)}</span></div>
-      <div class="dim small">${h.minutes} phút${h.skipped ? ' · bỏ qua ' + h.skipped + ' động tác' : ''}</div></div>`;
+      <div class="dim small">${h.minutes} phút${h.skipped ? ' · bỏ qua ' + h.skipped + ' động tác' : ''}${h.feel ? ' · ' + FEEL[h.feel].toLowerCase() : ''}</div></div>`;
   }
   if (h.type === 'test') {
     return `<div><div class="row"><span>Bài thử sức</span><span class="dim small">${fmtPast(h.date)}</span></div>
@@ -354,7 +354,7 @@ function viewWelcome() {
 function legsCard(pushupRestDay) {
   const t = today();
   const n = legsDone(state.history);
-  const level = levelFor(n);
+  const { level, toNext } = legsLevel(state.history);
   const plan = legsPlan(level);
   const mins = estimateMinutes(buildSteps(plan));
   const legsToday = doneOn(state.history, 'legs', t);
@@ -374,7 +374,7 @@ function legsCard(pushupRestDay) {
         <button id="pump">${pumpToday ? '✓ Đã bơm máu hôm nay — làm lần nữa' : 'Bơm máu bắp chân 2 phút (mỗi ngày)'}</button>
         <button id="guide" class="ghost">Xem hình động tác và lưu ý</button>
       </div>
-      <p class="dim small" style="margin-bottom:0">Đã tập ${n} buổi chân. Cứ 6 buổi lên một mức.</p>
+      <p class="dim small" style="margin-bottom:0">Đã tập ${n} buổi chân. ${level >= 3 ? 'Đang ở mức cao nhất.' : `Còn ${toNext} điểm nữa lên mức ${level + 1}.`} Cuối buổi chọn nhẹ / vừa / nặng: nhẹ +2 điểm, vừa +1, nặng giữ mức; hai buổi nặng liền thì lùi một mức.</p>
     </div>`;
 }
 function bindLegs() {
@@ -428,7 +428,7 @@ function viewGuide() {
 let legs = null;
 function startLegs(kind) {
   unlockAudio();
-  const level = levelFor(legsDone(state.history));
+  const { level } = legsLevel(state.history);
   const plan = kind === 'pump' ? pumpPlan() : legsPlan(level);
   legs = { kind, level, steps: buildSteps(plan, kind === 'pump' ? 10 : undefined), i: 0, started: Date.now(), skipped: 0, paused: false };
   workout = { phase: 'legs' }; // để giữ màn hình sáng khi quay lại app
@@ -548,26 +548,52 @@ function legsFinish() {
   const totalEx = l.steps.filter((x) => x.type === 'intro').length;
   const minutes = Math.max(1, Math.round((Date.now() - l.started) / 60000));
   const counted = l.skipped < totalEx; // bỏ qua hết thì không ghi
+  let entry = null;
   if (counted) {
-    state.history.push({ type: l.kind, date: today(), level: l.level, minutes, skipped: l.skipped });
+    // Ghi ngay (chưa chọn cảm nhận thì tính như «vừa») để đóng app giữa chừng không mất buổi.
+    entry = { type: l.kind, date: today(), level: l.level, minutes, skipped: l.skipped };
+    state.history.push(entry);
     save();
     soundFinish();
   }
   workout = { phase: 'summary' };
-  const n = legsDone(state.history);
-  const newLevel = levelFor(n);
-  stage(`
-    <div style="flex:1;overflow:auto">
-      <h1>${counted ? (l.kind === 'pump' ? 'Xong bài bơm máu' : 'Xong buổi chân') : 'Chưa tập động tác nào'}</h1>
-      <div class="card">
-        <div class="dim small">Thời gian</div><div class="big">${minutes} phút</div>
-        <p class="dim small" style="margin-bottom:0">${counted ? `Làm ${totalEx - l.skipped}/${totalEx} động tác.` : 'Buổi này không được ghi vào lịch sử.'}
-        ${counted && l.kind === 'legs' ? (newLevel > l.level ? ` Lên mức ${newLevel} từ buổi sau.` : ` Đã tập ${n} buổi chân, mức ${newLevel}.`) : ''}</p>
+  const ask = counted && l.kind === 'legs';
+  const draw = () => {
+    const n = legsDone(state.history);
+    const lv = legsLevel(state.history);
+    const verdict = !ask ? '' : !entry.feel ? ''
+      : lv.level > l.level ? `Lên mức ${lv.level} từ buổi sau.`
+      : lv.level < l.level ? `Hai buổi nặng liền: lùi về mức ${lv.level} để cơ kịp thích nghi.`
+      : entry.feel === 'hard' ? `Giữ mức ${lv.level}, buổi này không cộng điểm.`
+      : lv.level >= 3 ? 'Đang ở mức cao nhất.'
+      : `Mức ${lv.level}, còn ${lv.toNext} điểm nữa lên mức ${lv.level + 1}.`;
+    stage(`
+      <div style="flex:1;overflow:auto">
+        <h1>${counted ? (l.kind === 'pump' ? 'Xong bài bơm máu' : 'Xong buổi chân') : 'Chưa tập động tác nào'}</h1>
+        <div class="card">
+          <div class="dim small">Thời gian</div><div class="big">${minutes} phút</div>
+          <p class="dim small" style="margin-bottom:0">${counted ? `Làm ${totalEx - l.skipped}/${totalEx} động tác.` : 'Buổi này không được ghi vào lịch sử.'}
+          ${ask ? ` Đã tập ${n} buổi chân.` : ''}</p>
+        </div>
+        ${ask ? `<div class="card">
+          <b>Buổi này thấy thế nào?</b>
+          <p class="dim small">Nhẹ: còn dư sức nhiều. Vừa: hết hiệp vẫn làm thêm được 3–4 lượt. Nặng: phải cố mới xong, hoặc bỏ dở.</p>
+          <div class="btns three">
+            ${Object.entries(FEEL).map(([k, name]) => `<button data-feel="${k}" class="${entry.feel === k ? 'primary' : ''}">${name}</button>`).join('')}
+          </div>
+          ${verdict ? `<p class="small" style="color:var(--accent);margin-bottom:0">${verdict}</p>` : ''}
+        </div>` : ''}
+        <div class="card"><p class="small" style="margin:0">Đứng dậy đi lại một hai phút. Uống nước.</p></div>
       </div>
-      <div class="card"><p class="small" style="margin:0">Đứng dậy đi lại một hai phút. Uống nước.</p></div>
-    </div>
-    <div class="btns"><button class="primary" id="home">Về trang chính</button></div>`, { quit: false });
-  on('home', viewHome);
+      <div class="btns"><button class="${ask && !entry.feel ? '' : 'primary'}" id="home">Về trang chính</button></div>`, { quit: false });
+    on('home', viewHome);
+    document.querySelectorAll('[data-feel]').forEach((b) => b.addEventListener('click', () => {
+      entry.feel = b.dataset.feel;
+      save();
+      draw();
+    }));
+  };
+  draw();
 }
 
 // ---------- Buổi tập / bài thử ----------

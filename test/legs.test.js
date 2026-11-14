@@ -1,18 +1,39 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  EX, levelFor, legsPlan, pumpPlan, buildSteps, estimateMinutes, stepSeconds, legsDone, doneOn, describe,
+  EX, legsLevel, legsPlan, pumpPlan, buildSteps, estimateMinutes, stepSeconds, legsDone, doneOn, describe,
   REST_SET, REST_SIDE,
 } from '../legs.js';
 import { FIG, figureSvg } from '../figures.js';
 
-test('mức theo số buổi chân đã tập: 6 buổi lên một mức, tối đa mức 3', () => {
-  assert.equal(levelFor(0), 1);
-  assert.equal(levelFor(5), 1);
-  assert.equal(levelFor(6), 2);
-  assert.equal(levelFor(11), 2);
-  assert.equal(levelFor(12), 3);
-  assert.equal(levelFor(99), 3);
+const L = (...feels) => feels.map((feel) => ({ type: 'legs', feel: feel || undefined }));
+
+test('mức chân: buổi «vừa» hoặc chưa trả lời +1 điểm, đủ 6 điểm lên một mức, tối đa mức 3', () => {
+  assert.deepEqual(legsLevel([]), { level: 1, points: 0, toNext: 6 });
+  assert.equal(legsLevel(L('ok', '', 'ok', 'ok', 'ok')).level, 1);
+  assert.deepEqual(legsLevel(L('ok', 'ok', 'ok', 'ok', 'ok', 'ok')), { level: 2, points: 6, toNext: 6 });
+  assert.equal(legsLevel(L(...Array(12).fill('ok'))).level, 3);
+  assert.deepEqual(legsLevel(L(...Array(40).fill('ok'))), { level: 3, points: 12, toNext: 0 });
+});
+
+test('mức chân: «nhẹ» +2 điểm nên 3 buổi là lên mức', () => {
+  assert.equal(legsLevel(L('easy', 'easy')).level, 1);
+  assert.equal(legsLevel(L('easy', 'easy', 'easy')).level, 2);
+});
+
+test('mức chân: «nặng» không cộng điểm; hai buổi nặng liền thì lùi về đầu mức dưới', () => {
+  assert.equal(legsLevel(L('ok', 'ok', 'hard')).points, 2);
+  const lv2 = L(...Array(8).fill('ok')); // mức 2, 8 điểm
+  assert.deepEqual(legsLevel([...lv2, ...L('hard')]), { level: 2, points: 8, toNext: 4 });
+  assert.deepEqual(legsLevel([...lv2, ...L('hard', 'hard')]), { level: 1, points: 0, toNext: 6 });
+  // nặng – vừa – nặng không tính là liền nhau
+  assert.equal(legsLevel([...lv2, ...L('hard', 'ok', 'hard')]).level, 2);
+  // đang ở mức 1 thì không lùi thêm
+  assert.deepEqual(legsLevel(L('ok', 'hard', 'hard')), { level: 1, points: 0, toNext: 6 });
+});
+
+test('mức chân: bài bơm máu và buổi hít đất không tính điểm', () => {
+  assert.equal(legsLevel([{ type: 'pump' }, { type: 'session' }, { type: 'test' }]).points, 0);
 });
 
 test('mức 1: 2 hiệp × 10; mức 2: 3 hiệp × 12; mức 3: biến thể một chân', () => {
