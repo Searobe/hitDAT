@@ -50,7 +50,7 @@ const pk = (t, lo, hi, tail = lo) => [[0, lo], [t[0], hi], [t[2], hi], [Math.min
 
 const DEFS = {
   ankle: {
-    box: [8, 92, 188, 52], view: VIEW, front: { th: -1, sh: -1, tr: -1 }, show: 0.7,
+    box: [76, 94, 122, 46], crop: true, view: VIEW, front: { th: -1, sh: -1, tr: -1 }, show: 0.7,
     pose: () => {
       const dz = { k2: -6, a2: -6, t2: -6 };
       const leg = { k1: [127, 128.5], a1: [155, 131], k2: [127, 128.5], a2: [155, 131] };
@@ -67,7 +67,7 @@ const DEFS = {
     },
   },
   calf: {
-    box: [40, -10, 128, 150], view: VIEW, front: { th: -1, sh: -1, tr: -1 }, props: 'wall', show: 0.45,
+    box: [40, -10, 128, 150], ground: 132.8, view: VIEW, front: { th: -1, sh: -1, tr: -1 }, props: 'wall', show: 0.45,
     pose: () => rep(STAND_Z, { ...STAND, ...WALL }, { head: [101, 4], sh: [101, 21], hip: [101, 59], k1: [104, 88], a1: [103, 116.5], k2: [104, 88], a2: [103, 116.5] }, T.calf),
     mus: [{ id: 'sol', lvl: 'main' }, { id: 'gas', lvl: 'main' }],
     act: { sol: [[0, 0.2], [T.calf[0], 1], [T.calf[2], 1], [0.78, 0.55], [1, 0.2]], gas: [[0, 0.2], [T.calf[0], 1], [T.calf[2], 1], [0.78, 0.55], [1, 0.2]] },
@@ -80,7 +80,7 @@ const DEFS = {
   },
   clam: {
     // Nằm nghiêng nhìn từ trên cao phía trước: đùi chĩa về phía người xem, cẳng chân gập về sau, hai gót chạm nhau (đỉnh chữ V); gối trên mở lên như vỏ sò.
-    dz: {}, box: [10, 44, 160, 96], view: [0.35, 0.65], front: { th: -1, sh: -1, tr: 1 }, show: 0.5, floor: [86, 130], cue: 'k1',
+    dz: {}, box: [10, 44, 160, 96], view: [0.35, 0.65], front: { th: -1, sh: -1, tr: 1 }, show: 0.5, floor: [86, 130], cue: 'k1', ctx: false,
     pose: () => rep({}, {
       head: [38, 70, 0], sh: [60, 76, 0], hip: [98, 80, 0], el: [66, 84, 12], hd: [48, 78, 10],
       k1: [105, 74, 29], a1: [125, 76, 9], t1: [144, 76, 8], k2: [105, 84, 29], a2: [125, 84, 9], t2: [144, 84, 8],
@@ -89,7 +89,7 @@ const DEFS = {
     act: { gmed: pk(T.clam, 0.15, 1) },
   },
   squat: {
-    box: [40, -10, 128, 150], view: VIEW, front: { th: -1, sh: -1, tr: -1 }, show: 0.5,
+    box: [40, -10, 128, 150], ground: 132.8, view: VIEW, front: { th: -1, sh: -1, tr: -1 }, show: 0.5,
     pose: () => rep(STAND_Z, STAND, { head: [103, 48], sh: [97, 65], hip: [82, 98], k1: [112, 102], k2: [112, 102], el: [118, 64], hd: [134, 64] }, T.squat),
     mus: [{ id: 'quad', lvl: 'main' }, { id: 'gmax', lvl: 'main' }, { id: 'ham', lvl: 'extra' }],
     act: {
@@ -100,7 +100,7 @@ const DEFS = {
   },
   fig4: {
     // Nằm ngửa nhìn từ trên cao phía trước: chân dưới co gối, mắt cá chân gác lên gối đó, gối chân gác đổ ra phía người xem thành hình số 4; hai tay ôm đùi chân dưới.
-    dz: {}, box: [10, 44, 160, 96], view: [0.2, 0.7], front: { th: -1, sh: -1, tr: -1 }, show: 0.5, floor: [88, 134],
+    dz: {}, box: [10, 44, 160, 96], view: [0.2, 0.7], front: { th: -1, sh: -1, tr: -1 }, show: 0.5, floor: [88, 134], ctx: false,
     pose: () => rep({}, {
       head: [43, 100, 0], sh: [60, 102, 0], hip: [98, 104, 0], el: [78, 96, 14], hd: [102, 82, -2],
       k2: [106, 76, -4], a2: [126, 107, -4], t2: [144, 112, -4],
@@ -110,7 +110,7 @@ const DEFS = {
     act: { gmax: [[0, 0.5], [T.fig4[0], 1], [T.fig4[2], 1], [0.85, 0.7], [1, 0.5]], pir: [[0, 0.6], [T.fig4[0], 1], [T.fig4[2], 1], [0.85, 0.75], [1, 0.6]] },
   },
   calf1: {
-    box: [40, -10, 128, 150], view: VIEW, front: { th: -1, sh: -1, tr: -1 }, props: 'wall', show: 0.45,
+    box: [40, -10, 128, 150], ground: 132.8, view: VIEW, front: { th: -1, sh: -1, tr: -1 }, props: 'wall', show: 0.45,
     pose: () => rep(STAND_Z, { ...STAND, ...WALL, k2: [108, 97], a2: [84, 108], t2: [76, 114] }, { head: [101, 4], sh: [101, 21], hip: [101, 59], k1: [104, 88], a1: [103, 116.5], k2: [109, 87], a2: [86, 97], t2: [78, 103] }, T.calf),
     mus: [{ id: 'sol', lvl: 'main' }, { id: 'gas', lvl: 'main' }],
     act: { sol: [[0, 0.2], [T.calf[0], 1], [T.calf[2], 1], [0.78, 0.55], [1, 0.2]], gas: [[0, 0.2], [T.calf[0], 1], [T.calf[2], 1], [0.78, 0.55], [1, 0.2]] },
@@ -122,7 +122,7 @@ const DEFS = {
     act: { gmax: pk(T.bridge, 0.15, 1), ham: pk(T.bridge, 0.1, 0.6) },
   },
   split: {
-    box: [30, -10, 128, 150], view: VIEW, front: { th: -1, sh: -1, tr: -1 }, show: 0.5,
+    box: [30, -10, 128, 150], ground: 132.8, view: VIEW, front: { th: -1, sh: -1, tr: -1 }, show: 0.5,
     pose: () => rep({ k1: 6, a1: 6, t1: 6, k2: -6, a2: -6, t2: -6 }, { head: [100, 15], sh: [100, 32], hip: [100, 70], k1: [119, 98], a1: [124, 127.4], t1: [142, 132], k2: [84, 97], a2: [64, 123], t2: [74, 132], el: [104, 53], hd: [104, 74] }, { head: [100, 45], sh: [100, 62], hip: [100, 100], k1: [128, 100], a1: [124, 127.4], k2: [86, 126], a2: [66, 121], hd: [104, 94] }, T.squat),
     mus: [{ id: 'quad', lvl: 'main' }, { id: 'gmax', lvl: 'main' }],
     act: {
@@ -223,9 +223,9 @@ export function activationAt(id, m, ph) {
   return Math.max(0, Math.min(1, v));
 }
 
-// ---- Giải phẫu bề mặt.
-// Đường viền mỗi đoạn chi là bề dày thật theo chiều dọc xương (u = 0 ở khớp gần, 1 ở khớp xa): [u, nửa bề dày phía trước, phía sau] tính bằng đơn vị khung hình.
-// Tỉ lệ theo Loomis / Bridgman (đùi tròn, đầu gối vuông, bắp chân hình nêm ở phía sau, gân gót thon) và giải phẫu bề mặt của Gray's Anatomy.
+// ---- Giải phẫu bóc da (kiểu Albinus / Vesalius): bóng da mờ, khung xương nét mảnh, từng đầu cơ có thớ và gân bám xương.
+// Đường viền da: bề dày thật theo chiều dọc xương (u = 0 ở khớp gần, 1 ở khớp xa): [u, nửa bề dày phía trước, phía sau].
+// Tỉ lệ theo Loomis / Bridgman và giải phẫu bề mặt của Gray's Anatomy.
 const PROFILE = {
   tr: [[-0.3, 3.4, 3.8], [-0.12, 6, 6.5], [0, 8.6, 9], [0.2, 9.6, 8.4], [0.45, 7.6, 7.4], [0.7, 8, 9.4], [0.9, 8.4, 11], [1, 8, 11.5], [1.14, 6.4, 9.6]],
   th: [[-0.22, 3, 3], [-0.14, 6.2, 6.8], [0, 8, 8.6], [0.2, 8.7, 8], [0.45, 8.2, 6.9], [0.7, 6.9, 5.7], [0.92, 5.3, 4.9], [1.05, 5, 4.7]],
@@ -233,7 +233,6 @@ const PROFILE = {
   ua: [[-0.13, 2.2, 2.2], [-0.06, 4.2, 4.1], [0.5, 4, 4.2], [1.04, 3.2, 3.3]],
   fa: [[-0.12, 2.4, 2.4], [-0.05, 3.5, 3.5], [0.35, 3.6, 3.7], [0.85, 2.5, 2.5], [1.14, 2.3, 2.3], [1.2, 1.2, 1.2]],
 };
-// Hàm Hermite cho đường viền: nội suy trơn giữa các mẫu.
 function curve1(us, vs) {
   const n = us.length;
   const m = us.map((_, i) => (i === 0 ? (vs[1] - vs[0]) / (us[1] - us[0]) : i === n - 1 ? (vs[n - 1] - vs[n - 2]) / (us[n - 1] - us[n - 2]) : (vs[i + 1] - vs[i - 1]) / (us[i + 1] - us[i - 1])));
@@ -248,23 +247,41 @@ function curve1(us, vs) {
 const PF = {};
 for (const [k, p] of Object.entries(PROFILE)) PF[k] = { u0: p[0][0], u1: p[p.length - 1][0], f: curve1(p.map((r) => r[0]), p.map((r) => r[1])), b: curve1(p.map((r) => r[0]), p.map((r) => r[2])) };
 
-// Bó cơ. Cơ dọc đoạn chi: pts = [u, phần trong, phần ngoài] theo tỉ lệ bề dày da phía side (0 = trục xương, 1 = mặt da); fib = các đường sợi cơ [u, tỉ lệ];
-// bump = [u đỉnh, độ rộng, biên độ]: da phồng lên bấy nhiêu khi cơ co. Cơ vùng chậu: pts là các điểm neo ['p', dọc thân, phía lưng] hoặc ['t', u trên đùi, tỉ lệ bề dày (âm = phía sau)].
-const MUSC = {
-  sol: { seg: 'sh', side: 'back', name: 'Cơ dép', pts: [[0.3, 0.2, 0.62], [0.42, 0.14, 0.7], [0.56, 0.16, 0.76], [0.7, 0.28, 0.84], [0.82, 0.5, 0.88]], fib: [[[0.35, 0.35], [0.55, 0.36], [0.76, 0.6]]], bump: [0.5, 0.14, 0.5] },
-  gas: { seg: 'sh', side: 'back', name: 'Cơ sinh đôi (hai đầu)', pts: [[0, 0.5, 0.85], [0.07, 0.3, 0.95], [0.2, 0.1, 0.98], [0.34, 0.12, 0.97], [0.46, 0.3, 0.94], [0.56, 0.55, 0.9], [0.64, 0.78, 0.88]], fib: [[[0.04, 0.7], [0.25, 0.7], [0.52, 0.8]], [[0.06, 0.42], [0.28, 0.4], [0.56, 0.62]]], bump: [0.24, 0.16, 1.4] },
-  tib: { seg: 'sh', side: 'front', name: 'Cơ chày trước', pts: [[0.05, 0.35, 0.8], [0.15, 0.2, 0.95], [0.4, 0.2, 0.95], [0.65, 0.35, 0.9], [0.85, 0.55, 0.82]], fib: [[[0.1, 0.55], [0.45, 0.58], [0.8, 0.7]]], bump: [0.35, 0.2, 0.5] },
-  quad: { seg: 'th', side: 'front', name: 'Cơ tứ đầu đùi', pts: [[0.06, 0.45, 0.85], [0.14, 0.15, 0.96], [0.35, 0.05, 0.98], [0.6, 0.12, 0.97], [0.8, 0.3, 0.92], [0.95, 0.6, 0.85]], fib: [[[0.1, 0.5], [0.45, 0.45], [0.88, 0.7]], [[0.15, 0.86], [0.5, 0.9], [0.85, 0.82]]], bump: [0.5, 0.2, 1] },
-  ham: { seg: 'th', side: 'back', name: 'Cơ đùi sau', pts: [[0.1, 0.5, 0.85], [0.18, 0.2, 0.96], [0.4, 0.08, 0.98], [0.6, 0.15, 0.97], [0.8, 0.4, 0.9], [0.93, 0.6, 0.85]], fib: [[[0.15, 0.6], [0.5, 0.5], [0.88, 0.75]], [[0.2, 0.88], [0.55, 0.85], [0.85, 0.8]]], bump: [0.5, 0.2, 0.8] },
-  gmax: { pel: true, name: 'Cơ mông lớn', pts: [['p', -13, 3.5], ['p', -9, 9], ['p', -2, 11], ['p', 4.5, 9.6], ['t', 0.22, -0.9], ['t', 0.06, -0.15], ['p', -4, 1.5]], fib: [[1, 4], [2, 4], [0, 5], [3, 4]], bump: [0.95, 0.15, 1.2] },
-  gmed: { pel: true, name: 'Cơ mông nhỡ', pts: [['p', -12, 2.5], ['p', -9, 7.5], ['p', -3, 10], ['p', 3, 8], ['t', 0.1, -0.6], ['p', 0, 2]], fib: [[0, 4], [1, 4], [2, 4], [3, 4]], bump: [0.9, 0.14, 0.6] },
-  pir: { pel: true, deep: true, name: 'Cơ hình lê', pts: [['p', -8, 6.4], ['p', -8.6, 8.4], ['p', 0, 6], ['p', 1.2, 3.6]], fib: [[0, 3]], bump: null },
+// Bó cơ. Mỗi cơ gồm một hay nhiều đầu (part). m = mã cơ (cường độ và mức màu lấy theo m).
+//  host 't' đùi, 's' cẳng chân: pts = [u, phần trong, phần ngoài] theo tỉ lệ bề dày da phía side; style 'pen' = cơ lông chim.
+//  host 'p' (vùng chậu): o = các điểm bám gốc, i = các điểm bám tận; điểm neo: ['p', dọc thân, phía lưng] · ['t'|'s', u, tỉ lệ bề dày (âm = phía sau)] · ['f', x, y] trên bàn chân.
+//  tend = gân nối đầu cơ với điểm bám xương. Xếp từ sâu ra nông (vẽ lần lượt).
+const PARTS = [
+  { m: 'pir', host: 'p', deep: true, n: 2, o: [['p', -8, 5.8], ['p', -8.4, 8]], i: [['t', 0.02, -0.3], ['t', 0.05, -0.42]] },
+  { m: 'gmed', host: 'p', n: 7, o: [['p', -14, 2], ['p', -12.5, 6.5], ['p', -7, 9.5], ['p', -2, 9.6]], i: [['t', 0, -0.3], ['t', 0.06, -0.62]] },
+  { m: 'sol', host: 's', side: 'back', style: 'pen', n: 4, pts: [[0.1, 0.05, 0.55], [0.22, 0, 0.64], [0.4, 0, 0.7], [0.55, 0.05, 0.62], [0.64, 0.25, 0.55]], tend: [{ at: 'end', to: ['f', -4.5, -1.4], w: 1.6 }] },
+  { m: 'tib', host: 's', side: 'front', n: 4, pts: [[0.04, 0.3, 0.72], [0.12, 0.12, 0.9], [0.35, 0.1, 0.94], [0.58, 0.2, 0.86], [0.78, 0.4, 0.76]], tend: [{ at: 'end', to: ['f', 7.5, 0.6], w: 1.3 }] },
+  { m: 'vm', host: 't', side: 'front', n: 4, pts: [[0.5, 0.35, 0.8], [0.62, 0.2, 0.93], [0.8, 0.12, 0.95], [0.95, 0.3, 0.86]], tend: [{ at: 'end', to: ['t', 1, 0.85], w: 1.4 }] },
+  { m: 'rf', host: 't', side: 'front', style: 'pen', n: 4, pts: [[0.1, 0.35, 0.75], [0.2, 0.2, 0.92], [0.4, 0.2, 0.95], [0.62, 0.3, 0.9], [0.78, 0.5, 0.8]], tend: [{ at: 'start', to: ['p', -5, -7.8], w: 1.4 }, { at: 'end', to: ['t', 1, 0.85], w: 1.5 }] },
+  { m: 'vl', host: 't', side: 'front', n: 7, pts: [[0.08, 0.15, 0.8], [0.2, 0, 0.97], [0.45, 0, 0.99], [0.7, 0.1, 0.96], [0.9, 0.35, 0.86]], tend: [{ at: 'end', to: ['t', 1, 0.85], w: 1.6 }] },
+  { m: 'ham', host: 't', side: 'back', n: 3, pts: [[0.4, 0.2, 0.8], [0.55, 0.05, 0.92], [0.75, 0.15, 0.86]] },
+  { m: 'ham', host: 't', side: 'back', style: 'pen', n: 3, pts: [[0.15, 0.45, 0.75], [0.3, 0.3, 0.86], [0.5, 0.35, 0.86]], tend: [{ at: 'end', to: ['s', 0.1, -0.3], w: 1.1 }] },
+  { m: 'ham', host: 't', side: 'back', n: 6, pts: [[0.1, 0.35, 0.86], [0.2, 0.1, 0.98], [0.42, 0.05, 0.99], [0.62, 0.15, 0.96], [0.8, 0.35, 0.86]], tend: [{ at: 'start', to: ['p', 5.4, 5.6], w: 1.6 }, { at: 'end', to: ['s', 0.06, -0.55], w: 1.3 }] },
+  { m: 'gas', host: 's', side: 'back', n: 5, pts: [[-0.06, 0.4, 0.7], [0.04, 0.2, 0.86], [0.2, 0.05, 0.93], [0.36, 0.1, 0.9], [0.5, 0.35, 0.8], [0.6, 0.55, 0.75]], tend: [{ at: 'end', to: ['f', -4.5, -1.4], w: 1.7 }] },
+  { m: 'gas', host: 's', side: 'back', n: 6, pts: [[-0.1, 0.45, 0.8], [0, 0.28, 0.95], [0.14, 0.08, 0.99], [0.3, 0.1, 0.98], [0.45, 0.3, 0.9], [0.58, 0.55, 0.8]], tend: [{ at: 'end', to: ['f', -4.5, -1.4], w: 1.7 }] },
+  { m: 'gmax', host: 'p', n: 8, o: [['p', -13, 3], ['p', -11, 8], ['p', -6, 11], ['p', 0, 11.6]], i: [['t', 0.06, -0.4], ['t', 0.16, -0.85], ['t', 0.26, -0.95]] },
+];
+// Dải gân (không phải cơ): dây chằng bánh chè và dải chậu chày.
+const BANDS = [
+  { from: ['t', 1, 0.85], to: ['s', 0.1, 0.95], w: 1.5 },
+  { from: ['t', 0.12, 0.2], to: ['s', 0.06, 0.8], w: 2.2 },
+];
+export const MUSCLE_NAMES = {
+  sol: 'Cơ dép', gas: 'Cơ sinh đôi (hai đầu)', tib: 'Cơ chày trước', quad: 'Cơ tứ đầu đùi', vl: 'Cơ rộng ngoài', vm: 'Cơ rộng trong', rf: 'Cơ thẳng đùi',
+  ham: 'Nhóm đùi sau (nhị đầu, bán gân)', gmax: 'Cơ mông lớn', gmed: 'Cơ mông nhỡ', pir: 'Cơ hình lê',
 };
-export const MUSCLE_NAMES = Object.fromEntries(Object.entries(MUSC).map(([k, v]) => [k, v.name]));
+// Mã cơ trong hình (FIG[id].mus) → các đầu cơ vẽ: 'quad' = rộng ngoài + thẳng đùi + rộng trong.
+const GROUP = { quad: ['vl', 'rf', 'vm'] };
 
 // ---- Hình học.
 const r1 = (v) => Math.round(v * 10) / 10;
 const unit = (a, b) => { const dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1; return [dx / l, dy / l]; };
+const lerp2 = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
 // Đường cong kín Catmull-Rom → Bézier bậc ba.
 function smooth(pts) {
   const n = pts.length;
@@ -275,7 +292,6 @@ function smooth(pts) {
   }
   return `${d}Z`;
 }
-// Đường cong hở Catmull-Rom → Bézier (cho nét viền không khép kín).
 function smoothOpen(pts) {
   const n = pts.length;
   let d = `M${r1(pts[0][0])} ${r1(pts[0][1])}`;
@@ -293,23 +309,22 @@ function frame(P, Q, sf) {
 const at = (fr, u, w) => [fr.P[0] + (fr.Q[0] - fr.P[0]) * u + fr.F[0] * w, fr.P[1] + (fr.Q[1] - fr.P[1]) * u + fr.F[1] * w];
 const gauss = (u, [u0, sw, amp]) => amp * Math.exp(-(((u - u0) / sw) ** 2));
 
-// Đường viền một đoạn chi, da phồng thêm theo các cơ đang co (bumps: [{side, spec, k}]).
+// Bóng da một đoạn chi (da phồng thêm theo cơ đang co).
 function limb(fr, key, bumps = []) {
   const p = PF[key];
-  const wf = (u) => p.f(u) + bumps.reduce((a, b) => (b.side === 'front' ? a + b.k * gauss(u, b.spec) : a), 0);
-  const wb = (u) => p.b(u) + bumps.reduce((a, b) => (b.side === 'back' ? a + b.k * gauss(u, b.spec) : a), 0);
+  const wf = (u) => p.f(u);
+  const wb = (u) => p.b(u);
   const N = 9, front = [], back = [];
   for (let i = 0; i <= N; i++) {
     const u = p.u0 + ((p.u1 - p.u0) * i) / N;
     front.push(at(fr, u, wf(u)));
     back.push(at(fr, u, -wb(u)));
   }
-  // nét viền: chỉ hai cạnh bên, bỏ hai đầu khớp để chỗ nối liền mạch, không lộ đường ngang
   const e = `${smoothOpen(front.slice(1, N))}${smoothOpen(back.slice(1, N))}`;
   return { d: smooth([...front, ...back.reverse()]), e, wf, wb, fr };
 }
 
-// Bàn chân: gót, vòm, ngón; sàn chân cách tâm cổ chân h, mặt mu chân quay lên trên.
+// Bàn chân: sàn chân cách tâm cổ chân h, mặt mu chân quay lên trên. Trả về đường viền và hàm đổi toạ độ cục bộ (x dọc bàn chân, y lên mu chân).
 function foot(A, T) {
   const h = 4.6;
   const v = [T[0] - A[0], T[1] - A[1]];
@@ -321,101 +336,168 @@ function foot(A, T) {
     if (D[1] > 0) D = [-D[0], -D[1]];
   }
   const s = Math.hypot(v[0] + D[0] * h, v[1] + D[1] * h);
-  const loc = [[-3, 3.2], [-4.8, -0.4], [-5.2, -3], [-3.8, -h], [s * 0.4, -h + 0.6], [s - 2.4, -h], [s + 0.5, -h + 0.9], [s + 0.3, -h + 2.3], [s - 3.6, -h + 3.5], [s * 0.55, 0.8], [3, 2.6], [3.6, 3.8]];
-  return smooth(loc.map(([a, b]) => [A[0] + x[0] * a + D[0] * b, A[1] + x[1] * a + D[1] * b]));
+  const loc = (a, b) => [A[0] + x[0] * a + D[0] * b, A[1] + x[1] * a + D[1] * b];
+  const pts = [[-3, 3.2], [-4.8, -0.4], [-5.2, -3], [-3.8, -h], [s * 0.4, -h + 0.6], [s - 2.4, -h], [s + 0.5, -h + 0.9], [s + 0.3, -h + 2.3], [s - 3.6, -h + 3.5], [s * 0.55, 0.8], [3, 2.6], [3.6, 3.8]];
+  // khung xương bàn chân: xương gót, xương sên, ba xương bàn chân
+  const bones = `${smooth([[-4.6, -3.4], [-4.4, -0.4], [-2, 0.9], [1.6, -0.4], [2.6, -3.2], [-1, -3.9]].map(([a, b]) => loc(a, b)))}${smooth([[-1, 1.6], [0.4, 2.8], [2.2, 2], [1.2, 0.6]].map(([a, b]) => loc(a, b)))}`
+    + [0.6, -0.8, -2.2].map((b) => `M${loc(3, b).map(r1).join(' ')}L${loc(s - 1.5, -h + 1.4 + (b + 0.8) * 0.3).map(r1).join(' ')}`).join('');
+  return { d: smooth(pts.map(([a, b]) => loc(a, b))), loc, s, h, bones };
 }
 
-// Đầu: hộp sọ, trán, mũi, cằm, nhìn nghiêng; hướng mặt theo ngực.
-function headPath(H, S, F) {
+// Đầu nhìn nghiêng: hộp sọ, trán, mũi, cằm; hướng mặt theo ngực. k = tỉ lệ (xương sọ nhỏ hơn bóng da).
+function headPath(H, S, F, k = 1) {
   const up = unit(S, H);
   const loc = [[10.2, -0.5], [9.4, 4.2], [6.2, 7.4], [2.8, 8], [0.4, 8.6], [-1.6, 10.6], [-2.8, 8.6], [-4.6, 8.2], [-7.4, 6.2], [-8.6, 2.4], [-6.6, -2.6], [-3, -6.2], [0.6, -9.2], [5.6, -8.4], [9, -4.6]];
-  return smooth(loc.map(([a, w]) => [H[0] + up[0] * a + F[0] * w, H[1] + up[1] * a + F[1] * w]));
+  return smooth(loc.map(([a, w]) => [H[0] + up[0] * a * k + F[0] * w * k, H[1] + up[1] * a * k + F[1] * w * k]));
 }
 
-// Hình bó cơ dọc đoạn chi: vùng giữa lớp trong và lớp ngoài (tỉ lệ bề dày da), và các đường sợi cơ.
-function segMuscle(L, def, v, lvl) {
-  const sign = def.side === 'front' ? 1 : -1;
-  const W = (u) => (def.side === 'front' ? L.wf(u) : L.wb(u));
-  const interp = (u, c) => {
-    const a = def.pts;
-    if (u <= a[0][0]) return a[0][c];
-    for (let i = 0; i < a.length - 1; i++) if (u <= a[i + 1][0]) { const t = (u - a[i][0]) / (a[i + 1][0] - a[i][0]); return a[i][c] + (a[i + 1][c] - a[i][c]) * t; }
-    return a[a.length - 1][c];
-  };
-  const u0 = def.pts[0][0], u1 = def.pts[def.pts.length - 1][0];
-  const ext = lvl === 'stretch' ? 0.04 * v : 0;
-  const N = 8, out = [], inn = [];
-  for (let i = 0; i <= N; i++) {
-    const u = u0 - ext + ((u1 - u0 + 2 * ext) * i) / N;
-    out.push(at(L.fr, u, sign * W(u) * interp(Math.max(u0, Math.min(u1, u)), 2) * 0.97));
-    inn.push(at(L.fr, u, sign * W(u) * interp(Math.max(u0, Math.min(u1, u)), 1)));
+// Dải giữa hai đường song song với trục đoạn: rows = [u, lệch1, lệch2] (lệch có dấu, dương = phía trước).
+const band = (fr, rows) => smooth([...rows.map(([u, a]) => at(fr, u, a)), ...rows.map(([u, , b]) => at(fr, u, b)).reverse()]);
+const ellipse = (C, rx, ry, rot) => {
+  const cs = Math.cos(rot), sn = Math.sin(rot);
+  return smooth(Array.from({ length: 8 }, (_, k) => { const a = (k * Math.PI) / 4; return [C[0] + rx * Math.cos(a) * cs - ry * Math.sin(a) * sn, C[1] + rx * Math.cos(a) * sn + ry * Math.sin(a) * cs]; }));
+};
+
+// Nội suy các điểm mẫu theo cột c của pts tại u.
+function ipts(pts, u, c) {
+  if (u <= pts[0][0]) return pts[0][c];
+  for (let i = 0; i < pts.length - 1; i++) {
+    if (u <= pts[i + 1][0]) { const t = (u - pts[i][0]) / (pts[i + 1][0] - pts[i][0]); return pts[i][c] + (pts[i + 1][c] - pts[i][c]) * t; }
   }
-  const d = smooth([...out, ...inn.reverse()]);
-  const d2 = def.fib.map((line) => `M${line.map(([u, f]) => { const p = at(L.fr, u, sign * W(u) * f); return `${r1(p[0])} ${r1(p[1])}`; }).join('L')}`).join('');
-  return { d, d2 };
+  return pts[pts.length - 1][c];
+}
+const polyAt = (P, t) => { const n = P.length - 1, x = t * n, i = Math.min(n - 1, Math.floor(x)); return lerp2(P[i], P[i + 1], x - i); };
+// Dải gân thon dần từ p (rộng w) tới q (hẹp).
+function tendonPath(p, q, w) {
+  const [dx, dy] = unit(p, q);
+  const nx = -dy, ny = dx;
+  return `M${r1(p[0] + nx * w * 0.5)} ${r1(p[1] + ny * w * 0.5)}L${r1(q[0] + nx * 0.3)} ${r1(q[1] + ny * 0.3)}L${r1(q[0] - nx * 0.3)} ${r1(q[1] - ny * 0.3)}L${r1(p[0] - nx * w * 0.5)} ${r1(p[1] - ny * w * 0.5)}Z`;
 }
 
-// Hình bó cơ vùng chậu: các điểm neo gắn với khung chậu và đùi.
-function pelMuscle(def, ctx, v, lvl) {
-  const { hip, dT, bk, thFr, thW } = ctx;
-  const pts = def.pts.map(([kind, a, b]) => (kind === 'p'
-    ? [hip[0] + dT[0] * a + bk[0] * b, hip[1] + dT[1] * a + bk[1] * b]
-    : at(thFr, a, b * thW(a, b))));
+// Đầu cơ dọc đoạn chi: thân cơ, sợi cơ (thoi hoặc lông chim) và gân.
+function segPart(L, part, v, lvl, anchor) {
+  const sign = part.side === 'front' ? 1 : -1;
+  const W = (u) => (part.side === 'front' ? L.wf(u) : L.wb(u));
+  const u0 = part.pts[0][0], u1 = part.pts[part.pts.length - 1][0];
+  const stretch = lvl === 'stretch';
+  const ext = stretch ? 0.04 * v : 0;
+  const N = 9, out = [], inn = [];
+  for (let i = 0; i <= N; i++) {
+    const u = u0 - ext + ((u1 - u0 + 2 * ext) * i) / N, uc = Math.max(u0, Math.min(u1, u));
+    const fb = Math.min(1.12, ipts(part.pts, uc, 2) * (stretch ? 1 : 1 + 0.12 * v));
+    out.push(at(L.fr, u, sign * W(u) * fb));
+    inn.push(at(L.fr, u, sign * W(u) * ipts(part.pts, uc, 1)));
+  }
+  const d = smooth([...out, ...inn.slice().reverse()]);
+  let fib = '';
+  if (part.style === 'pen') {
+    const ctr = out.map((o, i) => lerp2(inn[i], o, 0.5));
+    fib = smoothOpen(ctr);
+    for (let j = 1; j < N; j++) fib += `M${ctr[j].map(r1).join(' ')}L${out[Math.min(N, j + 1)].map(r1).join(' ')}M${ctr[j].map(r1).join(' ')}L${inn[Math.min(N, j + 1)].map(r1).join(' ')}`;
+  } else {
+    for (let k = 1; k <= part.n; k++) fib += smoothOpen(out.map((o, i) => lerp2(inn[i], o, k / (part.n + 1))));
+  }
+  let tdn = '';
+  for (const t of part.tend || []) {
+    const e = t.at === 'end' ? N : 0;
+    tdn += tendonPath(lerp2(inn[e], out[e], 0.5), anchor(t.to), t.w);
+  }
+  return { d, fib, tdn };
+}
+
+// Đầu cơ vùng chậu (hình quạt): nối chuỗi điểm bám gốc với chuỗi điểm bám tận; thớ cơ toả từ gốc về tận.
+function polyPart(part, v, lvl, anchor) {
+  const O = part.o.map(anchor), I = part.i.map(anchor);
+  const pts = [...O, ...I.slice().reverse()];
   const c = pts.reduce((s, q) => [s[0] + q[0] / pts.length, s[1] + q[1] / pts.length], [0, 0]);
-  const sc = lvl === 'stretch' ? 1 : 1 + 0.1 * v;
-  const along = lvl === 'stretch' ? 1 + 0.18 * v : 1;
-  const across = lvl === 'stretch' ? 1 - 0.06 * v : 1;
-  const ax = unit(pts[0], pts[Math.floor(pts.length / 2)]);
+  const ax = unit(polyAt(O, 0.5), polyAt(I, 0.5));
+  const stretch = lvl === 'stretch';
+  const along = stretch ? 1 + 0.16 * v : 1, across = stretch ? 1 - 0.05 * v : 1 + 0.08 * v;
   const tf = (q) => {
     const dx = q[0] - c[0], dy = q[1] - c[1];
-    const pa = dx * ax[0] + dy * ax[1], pe = dx * -ax[1] + dy * ax[0];
-    return [c[0] + (ax[0] * pa * along - ax[1] * pe * across) * sc, c[1] + (ax[1] * pa * along + ax[0] * pe * across) * sc];
+    const pa = dx * ax[0] + dy * ax[1], pe = -dx * ax[1] + dy * ax[0];
+    return [c[0] + ax[0] * pa * along - ax[1] * pe * across, c[1] + ax[1] * pa * along + ax[0] * pe * across];
   };
-  const P = pts.map(tf);
-  const d = smooth(P);
-  const d2 = def.fib.map(([i, j]) => `M${r1(P[i][0])} ${r1(P[i][1])}L${r1(P[j][0])} ${r1(P[j][1])}`).join('');
-  return { d, d2 };
+  const O2 = O.map(tf), I2 = I.map(tf);
+  const d = smooth([...O2, ...I2.slice().reverse()]);
+  let fib = '';
+  for (let k = 0; k <= part.n + 1; k++) {
+    const t = k / (part.n + 1);
+    fib += `M${polyAt(O2, t).map(r1).join(' ')}L${polyAt(I2, t).map(r1).join(' ')}`;
+  }
+  return { d, fib, tdn: '' };
 }
 
-// ---- Danh sách phần tử SVG theo thứ tự vẽ (xa → gần). Mỗi phần tử: { tag, cls, a: thuộc tính ở pha ph }.
-// Mỗi nhóm vẽ viền trước rồi tô sau, nên chỗ các đoạn chi chồng lên nhau liền khối, không lộ đường nối.
+// ---- Danh sách phần tử SVG theo thứ tự vẽ. Mỗi phần tử: { tag, cls, a: thuộc tính ở pha ph }; số phần tử và thứ tự không đổi giữa các pha.
 export function frameOps(id, ph) {
   const f = FIG[id];
   const P = poseAt(id, ph);
   const sf = f.front;
   const ops = [];
-  const act = {};
-  for (const m of f.mus) act[m.id] = activationAt(id, m.id, ph);
-  const bumpsOf = (host) => f.mus.filter((m) => MUSC[m.id].seg === host && m.lvl !== 'stretch' && MUSC[m.id].bump).map((m) => ({ side: MUSC[m.id].side, spec: MUSC[m.id].bump, k: act[m.id] }));
-  // trục thân và khung các đoạn
+  const act = {}, lvlOf = {};
+  for (const m of f.mus) { act[m.id] = activationAt(id, m.id, ph); lvlOf[m.id] = m.lvl; }
   const trFr = frame(P.sh, P.hip, sf.tr);
-  const gl = f.mus.filter((m) => MUSC[m.id].pel && m.lvl !== 'stretch');
-  const trunk = limb(trFr, 'tr', gl.map((m) => ({ side: 'back', spec: MUSC[m.id].bump, k: act[m.id] })));
-  const th1 = limb(frame(P.hip, P.k1, sf.th), 'th', bumpsOf('th'));
-  const sh1 = limb(frame(P.k1, P.a1, sf.sh), 'sh', bumpsOf('sh'));
+  const trunk = limb(trFr, 'tr');
+  const th1 = limb(frame(P.hip, P.k1, sf.th), 'th');
+  const sh1 = limb(frame(P.k1, P.a1, sf.sh), 'sh');
   const th2 = limb(frame(P.hip, P.k2, sf.th), 'th');
   const sh2 = limb(frame(P.k2, P.a2, sf.sh), 'sh');
   const ua = limb(frame(P.sh, P.el, 1), 'ua');
   const fa = limb(frame(P.el, P.hd, 1), 'fa');
-  const Ftr = trFr.F;
-  const group = (cls, items) => {
-    for (const it of items) ops.push({ tag: 'path', cls: `ol ${cls}`, a: { d: it.e || it.d || it } });
-    for (const it of items) ops.push({ tag: 'path', cls: `sk ${cls}`, a: { d: it.d || it } });
+  const ft1 = foot(P.a1, P.t1), ft2 = foot(P.a2, P.t2);
+  const Ftr = trFr.F, bk = [-Ftr[0], -Ftr[1]];
+  const pel = (d, b) => [P.hip[0] + trFr.d[0] * d + bk[0] * b, P.hip[1] + trFr.d[1] * d + bk[1] * b];
+  const anchor = ([k, a, b]) => {
+    if (k === 'p') return pel(a, b);
+    if (k === 't') return at(th1.fr, a, b * (b >= 0 ? th1.wf(a) : th1.wb(a)));
+    if (k === 's') return at(sh1.fr, a, b * (b >= 0 ? sh1.wf(a) : sh1.wb(a)));
+    return ft1.loc(a, b);
   };
-  group('far', [th2, sh2, foot(P.a2, P.t2)]);
-  group('', [trunk, headPath(P.head, P.sh, Ftr)]);
-  group('leg', [th1, sh1, foot(P.a1, P.t1)]);
-  const pelCtx = { hip: P.hip, dT: trFr.d, bk: [-Ftr[0], -Ftr[1]], thFr: th1.fr, thW: (u, b) => (b >= 0 ? th1.wf(u) : th1.wb(u)) };
-  const hostOf = (m) => (MUSC[m.id].pel ? 0 : MUSC[m.id].seg === 'th' ? 1 : 2);
-  for (const m of [...f.mus].sort((a, b) => hostOf(a) - hostOf(b))) {
-    const def = MUSC[m.id], lvl = m.lvl, v = act[m.id];
-    const sh = def.pel ? pelMuscle(def, pelCtx, v, lvl) : segMuscle(def.seg === 'th' ? th1 : sh1, def, v, lvl);
-    const op = lvl === 'stretch' ? 0.35 + 0.55 * v : 0.22 + 0.7 * v;
-    ops.push({ tag: 'path', cls: `musg ${lvl}`, a: { d: sh.d, opacity: r1(v * 0.45 * 100) / 100 } });
-    ops.push({ tag: 'path', cls: `mus ${lvl}${def.deep ? ' deep' : ''}`, a: { d: sh.d, opacity: r1(op * 100) / 100 } });
-    ops.push({ tag: 'path', cls: `musl ${lvl}`, a: { d: sh.d2, 'stroke-dashoffset': r1(-ph * 60), opacity: r1((0.25 + 0.6 * v) * 100) / 100 } });
+  const push = (cls, d, extra = {}) => ops.push({ tag: 'path', cls, a: { d, ...extra } });
+  const shadow = (cls, items) => {
+    for (const it of items) push(`ol ${cls}`, it.e || it.d || it);
+    for (const it of items) push(`sk ${cls}`, it.d || it);
+  };
+  // 1. chân xa: bóng da và vài nét xương
+  shadow('far', [th2, sh2, ft2]);
+  push('bone far', band(th2.fr, [[-0.04, 3.2, -3.2], [0.2, 2.1, -2.1], [0.8, 2.2, -2.4], [0.97, 3.6, -3.8]]));
+  push('bone far', band(sh2.fr, [[-0.02, 3.6, -3.6], [0.3, 1.9, -2.2], [0.94, 2.5, -2.6]]));
+  // 2. bóng da thân, đầu, chân gần
+  shadow('', [trunk, headPath(P.head, P.sh, Ftr)]);
+  shadow('leg', [th1, sh1, ft1]);
+  // 3. khung xương
+  const spine = [0.96, 0.84, 0.72, 0.6, 0.48, 0.36, 0.24, 0.12, 0, -0.12].map((u) => at(trFr, u, -0.5 * trunk.wb(u)));
+  push('bone', smooth([pel(-14, 2), pel(-12, 8.8), pel(-5, 10.2), pel(1.5, 9), pel(5.6, 6.6), pel(6.4, 2.6), pel(4.5, -2.6), pel(2, -5.4), pel(-1.5, -4.2), pel(-6, -8.2), pel(-12, -6.6)]));
+  push('bone spine', smoothOpen(spine));
+  push('bone', band(trFr, [[0, 4.5, -4.5], [0.06, 7.5, -6.8], [0.2, 8, -7], [0.34, 6.8, -6], [0.44, 4.2, -4.6]]));
+  push('bone rib', [0.12, 0.2, 0.28, 0.36].map((u) => `M${at(trFr, u, 6.4).map(r1).join(' ')}Q${at(trFr, u + 0.03, 0).map(r1).join(' ')} ${at(trFr, u - 0.01, -5.6).map(r1).join(' ')}`).join(''));
+  push('bone', headPath(P.head, P.sh, Ftr, 0.84));
+  push('bone', band(th1.fr, [[-0.04, 3.2, -3.2], [0.05, 2.6, -3.4], [0.2, 2.1, -2.1], [0.5, 1.9, -1.9], [0.8, 2.2, -2.4], [0.96, 3.6, -3.8], [1.03, 3, -3]]));
+  push('bone', `${ellipse(P.hip, 3.4, 3.4, 0)}${ellipse(at(th1.fr, 1, 0.8 * th1.wf(1)), 2.4, 1.8, Math.atan2(th1.fr.d[1], th1.fr.d[0]) + Math.PI / 2)}`);
+  push('bone', band(sh1.fr, [[-0.02, 3.6, -3.6], [0.06, 2.5, -2.8], [0.3, 1.9, -2.2], [0.7, 1.7, -2], [0.94, 2.5, -2.6], [1.03, 2.6, -2.8]]));
+  push('bone', band(sh1.fr, [[0.05, -2.2, -3.8], [0.3, -2.6, -3.6], [0.8, -2.8, -3.9], [1.02, -2.2, -4.2]]));
+  push('bone', ft1.bones);
+  push('bone', band(ua.fr, [[0, 2.8, -2.8], [0.5, 1.5, -1.5], [1, 2.4, -2.4]]));
+  push('bone', `${band(fa.fr, [[0, 2, -0.2], [0.5, 1.2, -0.5], [1, 1.6, 0.4]])}${band(fa.fr, [[0, 0.2, -2], [0.5, -0.1, -1.4], [1, -0.4, -1.4]])}`);
+  // 4. cơ, từ sâu ra nông
+  const parts = PARTS.filter((p) => f.ctx !== false || p.host === 'p');
+  for (const part of parts) {
+    const grpOf = Object.keys(GROUP).find((g) => GROUP[g].includes(part.m));
+    const key = f.mus.some((m) => m.id === part.m) ? part.m : f.mus.some((m) => m.id === grpOf) ? grpOf : null;
+    const lvl = key ? lvlOf[key] : 'ctx';
+    const v = key ? act[key] : 0;
+    const L = part.host === 's' ? sh1 : th1;
+    const r = part.host === 'p' ? polyPart(part, v, lvl, anchor) : segPart(L, part, v, lvl, anchor);
+    const op = lvl === 'ctx' ? 1 : lvl === 'stretch' ? 0.35 + 0.55 * v : 0.22 + 0.7 * v;
+    if (key) push(`musg ${lvl}`, r.d, { opacity: r1(v * 0.45 * 100) / 100 });
+    else push('musg ctx', r.d, { opacity: 0 });
+    push(`mus ${lvl}${part.deep ? ' deep' : ''}`, r.d, { opacity: r1(op * 100) / 100 });
+    push(`musl ${lvl}`, r.fib, { 'stroke-dashoffset': r1(-ph * 60), opacity: lvl === 'ctx' ? 1 : r1((0.3 + 0.6 * v) * 100) / 100 });
+    push(`tdn ${lvl}`, r.tdn);
   }
-  group('arm', [ua, { d: fa.d }]);
+  if (f.ctx !== false) for (const b of BANDS) push('tdn ctx', tendonPath(anchor(b.from), anchor(b.to), b.w));
+  // 5. tay (bóng da) ở lớp trên cùng
+  shadow('arm', [ua, { d: fa.d }]);
   return ops;
 }
 
@@ -429,8 +511,8 @@ export function figureSvg(id, dur = 2.5) {
   let out = `<svg class="fig" viewBox="${f.box.join(' ')}" data-fig="${id}" data-dur="${dur}" role="img" aria-label="Hình minh hoạ động tác và nhóm cơ tác động"><defs><linearGradient id="fskin" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8f0ff" stop-opacity=".34"/><stop offset="1" stop-color="#9fb4d6" stop-opacity=".07"/></linearGradient><linearGradient id="ffar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9fb4d6" stop-opacity=".16"/><stop offset="1" stop-color="#6f86ad" stop-opacity=".03"/></linearGradient></defs>`;
   const [bx, , bw] = f.box;
   if (f.floor) out += `<rect class="floor" x="${bx + 4}" y="${f.floor[0]}" width="${bw - 8}" height="${f.floor[1] - f.floor[0]}" rx="10"/>`;
-  else out += `<line class="ground" x1="${bx + 4}" y1="${GROUND + 5}" x2="${bx + bw - 4}" y2="${GROUND + 5}"/>`;
-  if (f.props === 'wall') out += `<line class="ground" x1="134" y1="20" x2="134" y2="${GROUND + 5}"/>`;
+  else out += `<line class="ground" x1="${bx + 4}" y1="${f.ground ?? GROUND + 5}" x2="${bx + bw - 4}" y2="${f.ground ?? GROUND + 5}"/>`;
+  if (f.props === 'wall') out += `<line class="ground" x1="134" y1="20" x2="134" y2="${f.ground ?? GROUND + 5}"/>`;
   if (f.cue) {
     // Mũi tên gợi ý hướng chuyển động của khớp chính (từ tư thế xuất phát tới tư thế đỉnh).
     const A = poseAt(id, 0)[f.cue], B = poseAt(id, f.show)[f.cue];
@@ -450,7 +532,7 @@ const still = () => typeof matchMedia === 'function' && matchMedia('(prefers-red
 
 function paint(svg, s) {
   const ops = frameOps(s.id, wrap(s.t / s.dur));
-  const els = svg.querySelectorAll('.ol, .sk, .musg, .mus, .musl');
+  const els = svg.querySelectorAll('.ol, .sk, .bone, .musg, .mus, .musl, .tdn');
   for (let i = 0; i < ops.length && i < els.length; i++) for (const k in ops[i].a) els[i].setAttribute(k, ops[i].a[k]);
 }
 function tick(now) {

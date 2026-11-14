@@ -49,7 +49,9 @@ Hình tập chân hiện là người que, hai tư thế nội suy thẳng, vùn
 
 ## Phong cách vẽ
 
-Thân người trong suốt như kính (nền chuyển sắc mờ, chân xa mờ hơn), nét viền mảnh sáng chỉ vẽ hai cạnh bên nên chỗ nối khớp liền mạch; bó cơ phát sáng bên trong, viền sáng và quầng mờ theo mức co, sợi cơ nét trắng mảnh. Không dùng bộ lọc làm mờ để nhẹ máy khi chuyển động.
+Bóc da kiểu Albinus / Vesalius (anh chọn ở vòng hai): thân người chỉ còn là bóng da trong suốt với nét viền mảnh; bên trong là khung xương nét mảnh màu ngà (xương chậu, cột sống, lồng ngực, sọ, xương đùi, bánh chè, xương chày, xương mác, xương bàn chân, xương tay) và các bó cơ vẽ từng đầu: bắp chân (hai đầu cơ sinh đôi + cơ dép), cơ chày trước, tứ đầu đùi (rộng ngoài, thẳng đùi, rộng trong), đùi sau (nhị đầu dài và ngắn, bán gân), mông lớn, mông nhỡ, cơ hình lê. Mỗi đầu cơ có thớ (thoi hoặc lông chim), gân thon dần nối vào xương (gân gót, gân bánh chè, dải chậu chày). Cơ đang tập tô đỏ / vàng / xanh và sáng theo pha; cơ còn lại vẽ nét trung tính làm nền như bản vẽ giải phẫu. Không dùng bộ lọc làm mờ để nhẹ máy khi chuyển động (mỗi khung hình tính khoảng 1 ms).
+
+Đã tra: Albinus dựng hình bằng lưới ô vuông và tách bản viền với bản cơ (https://sites.wip.nlm.nih.gov/exhibition/historicalanatomies/albinus_bio.html); Leonardo vẽ cơ chân như dây căng giữa hai điểm xương (https://col.rct.uk/collection/912625/the-leg-muscles-and-bones-of-man-and-horse). Không chép lại ảnh nào, chỉ học cách vẽ; hình dạng từng đầu cơ vẫn là đơn giản hoá bằng đường cong, không phải tranh giải phẫu.
 
 ## Giới hạn
 
