@@ -69,12 +69,12 @@ test('cường độ cơ trong [0, 1], cơ chính sáng nhất đúng lúc co v�
   assert.ok(activationAt('fig4', 'pir', 0.5) > activationAt('fig4', 'pir', 0));
 });
 
-test('hình vẽ: có thân khối, từng bó cơ có hình riêng, cơ giãn có sọc, không số hỏng', () => {
+test('hình vẽ: có bóng da và khung xương, từng bó cơ có hình riêng, cơ giãn có sọc, không số hỏng', () => {
   for (const id of IDS) {
     for (const ph of [0, 0.25, 0.5, 0.75]) {
       const ops = frameOps(id, ph);
       assert.ok(!JSON.stringify(ops).match(/NaN|Infinity|undefined/), `${id}@${ph}`);
-      assert.ok(ops.filter((o) => o.cls.startsWith('sk')).length >= 8 && ops.every((o) => !o.a.d || o.a.d.length > 0), `${id}: thiếu thân khối`);
+      assert.ok(ops.filter((o) => o.cls.startsWith('sk')).length >= 8 && ops.every((o) => !o.a.d || o.a.d.length > 0), `${id}: thiếu bóng da`);
       for (const lvl of new Set(FIG[id].mus.map((m) => m.lvl))) assert.ok(ops.some((o) => o.cls.startsWith(`mus ${lvl}`)), `${id}: thiếu cơ ${lvl}`);
       assert.ok(ops.filter((o) => /^mus (main|extra|stretch)/.test(o.cls)).length >= FIG[id].mus.length, `${id}: mỗi cơ cần ít nhất một đầu cơ`);
       assert.ok(ops.filter((o) => o.cls.startsWith('bone')).length >= 8, `${id}: thiếu khung xương`);

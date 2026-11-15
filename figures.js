@@ -1,8 +1,8 @@
-// Hình người khối chuyển động cho từng động tác chân, có vẽ từng bó cơ và độ sáng theo pha co – thả.
+// Hình giải phẫu bóc da cho từng động tác chân: bóng da trong suốt, khung xương nét mảnh, từng đầu cơ có thớ và gân; cơ sáng theo pha co – thả.
 // Mọi thứ là hàm thuần theo pha 0–1 của một lượt (pha 0 = tư thế xuất phát, quay lại pha 1 = pha 0):
-//   poseAt(id, pha)        toạ độ các khớp (đã chiếu xiên ra khung 200 × 150, kèm độ sâu z)
+//   poseAt(id, pha)           toạ độ các khớp (xương chuẩn độ dài không đổi, chân tay giải bằng động học ngược; đã chiếu xiên ra khung hình, kèm độ sâu z)
 //   activationAt(id, m, pha)  cường độ 0–1 của bó cơ m (cơ co: mức co; cơ giãn: mức kéo giãn)
-//   frameOps(id, pha)      danh sách phần tử SVG và thuộc tính ở pha đó
+//   frameOps(id, pha)         danh sách phần tử SVG (da, xương, cơ, gân) và thuộc tính ở pha đó; số phần tử và thứ tự không đổi giữa các pha
 // Chuyển động: các tư thế khoá nối bằng đường cong Hermite theo chu kỳ; khớp xa thân trễ nhẹ hơn khớp gần thân.
 // Toạ độ khớp: [x, y, z]; x, y như khung 200 × 150 (mặt đất y = 132), z > 0 là hướng về phía người xem.
 // Chiếu xiên: X = x + z·kx, Y = y + z·ky, nhờ vậy hai chân, hai gối tách nhau và động tác nằm nghiêng đọc được ở góc nhìn 3/4.

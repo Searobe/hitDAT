@@ -167,7 +167,7 @@ const camera = {
 // ---------- Trang chính ----------
 // Số bản: tăng cùng lúc với CACHE trong sw.js. Hiện ở chân trang để biết máy đang chạy bản nào.
 const VERSION = 9;
-const CREDIT = `<footer class="credit">v${VERSION}</footer>`;
+const CREDIT = `<footer class="credit">Made by Searobe · © 2026 · v${VERSION}</footer>`;
 function render(html) {
   $app.innerHTML = html;
   window.scrollTo(0, 0);
