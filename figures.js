@@ -521,8 +521,10 @@ export function figureSvg(id, dur = 2.5) {
     const w = (t) => `${r1(hx - 5 * Math.cos(ang + t))} ${r1(hy - 5 * Math.sin(ang + t))}`;
     out += `<path class="cue" d="M${r1(A[0])} ${r1(A[1])}Q${r1(mx)} ${r1(my)} ${hx} ${hy}M${w(0.45)}L${hx} ${hy}L${w(-0.45)}"/>`;
   }
+  // hình cắt (chỉ lấy phần chân): mép cắt mờ dần thay vì cụt gắt
+  if (f.crop) out += `<mask id="fcrop" maskUnits="userSpaceOnUse" x="${f.box[0]}" y="${f.box[1]}" width="${f.box[2]}" height="${f.box[3]}"><linearGradient id="fcropg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000"/><stop offset=".14" stop-color="#fff"/></linearGradient><rect x="${f.box[0]}" y="${f.box[1]}" width="${f.box[2]}" height="${f.box[3]}" fill="url(#fcropg)"/></mask><g mask="url(#fcrop)">`;
   for (const op of frameOps(id, f.show)) out += `<${op.tag} class="${op.cls}" ${attrs(op.a)}/>`;
-  return out + '</svg>';
+  return out + (f.crop ? '</g>' : '') + '</svg>';
 }
 
 // ---- Chạy chuyển động: một vòng requestAnimationFrame chung cho mọi hình đang hiện.
