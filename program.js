@@ -45,7 +45,7 @@ export function addDays(dateStr, n) {
 export function initialState() {
   return {
     v: 1,
-    settings: { mode: 'camera', sound: true, count: 'beep' }, // count: 'beep' | 'voice'
+    settings: { mode: 'camera', sound: true, count: 'beep', legsAuto: false }, // count: 'beep' | 'voice'; legsAuto: màn hướng dẫn động tác chân tự vào tập sau vài giây thay vì đợi bấm
     calib: null,
     T: null, // mức tối đa đang dùng để tính hiệp
     week: 1,

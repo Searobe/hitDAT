@@ -166,7 +166,7 @@ const camera = {
 
 // ---------- Trang chính ----------
 // Số bản: tăng cùng lúc với CACHE trong sw.js. Hiện ở chân trang để biết máy đang chạy bản nào.
-const VERSION = 9;
+const VERSION = 10;
 const CREDIT = `<footer class="credit">Made by Searobe · © 2026 · v${VERSION}</footer>`;
 function render(html) {
   $app.innerHTML = html;
@@ -460,25 +460,32 @@ function legsStep() {
 }
 function legsIntro(st, top) {
   const ex = EX[st.ex];
+  const auto = !!state.settings.legsAuto;
   let left = st.sec;
-  const draw = () => {
-    stage(`
-      <div style="flex:1;overflow:auto">
-        <h1>${ex.name}</h1>
-        <p class="dim small">${describe(st)}</p>
-        ${figureSvg(st.ex, ex.tempo || 4)}
-        ${musclesHtml(st.ex)}
-        <ul class="tight">${ex.how.map((x) => `<li>${x}</li>`).join('')}</ul>
-        <p class="dim small">${ex.avoid}</p>
-      </div>
-      <div class="btns two">
-        <button id="skipex">Bỏ qua động tác</button>
-        <button class="primary" id="now">Bắt đầu (${left})</button>
-      </div>`, { top });
-    on('now', () => { beep(1320, 220); legsNext(); });
-    on('skipex', legsSkipExercise);
-  };
-  draw();
+  stage(`
+    <div style="flex:1;overflow:auto">
+      <h1>${ex.name}</h1>
+      <p class="dim small">${describe(st)}</p>
+      ${figureSvg(st.ex, ex.tempo || 4)}
+      ${musclesHtml(st.ex)}
+      <ul class="tight">${ex.how.map((x) => `<li>${x}</li>`).join('')}</ul>
+      <p class="dim small">${ex.avoid}</p>
+      <button class="ghost" id="autolegs">Tự bắt đầu sau ${st.sec} giây: ${auto ? 'Bật' : 'Tắt'}</button>
+      <p class="dim small" style="margin:0">${auto ? 'Màn này tự vào tập sau vài giây, hợp khi đã quen động tác.' : `Màn này đợi bạn bấm «Bắt đầu»; bật tự bắt đầu nếu đã quen động tác.`}</p>
+    </div>
+    <div class="btns two">
+      <button id="skipex">Bỏ qua động tác</button>
+      <button class="primary" id="now">${auto ? `Bắt đầu (${left})` : 'Bắt đầu'}</button>
+    </div>`, { top });
+  on('now', () => { beep(1320, 220); legsNext(); });
+  on('skipex', legsSkipExercise);
+  on('autolegs', () => {
+    state.settings.legsAuto = !state.settings.legsAuto;
+    save();
+    clearTimers();
+    legsIntro(st, top);
+  });
+  if (!auto) return;
   every(() => {
     left -= 1;
     if (left <= 0) { beep(1320, 220); legsNext(); return; }

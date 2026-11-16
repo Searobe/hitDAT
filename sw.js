@@ -1,7 +1,7 @@
 // Chạy không cần mạng, nhưng có mạng thì luôn lấy bản mới nhất:
 // hỏi máy chủ trước (bỏ qua bộ nhớ đệm 10 phút của trình duyệt), quá 4 giây hoặc mất mạng thì dùng bản đã lưu.
 // Số ở CACHE phải bằng VERSION trong app.js (có ca kiểm).
-const CACHE = 'hitdat-9';
+const CACHE = 'hitdat-10';
 const FILES = ['./', 'index.html', 'style.css', 'app.js', 'program.js', 'legs.js', 'figures.js', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-180.png', 'icons/icon-512.png'];
 const TIMEOUT = 4000;
 

@@ -140,3 +140,7 @@ test('hiệu chỉnh: chọn đặc trưng tách rõ nhất, từ chối khi hai
   const c2 = chooseCalibration({ luma: 120, sd: 50 }, { luma: 115, sd: 10 });
   assert.equal(c2.feature, 'sd');
 });
+
+test('cài đặt mặc định: màn hướng dẫn động tác chân đợi bấm «Bắt đầu» (không tự vào tập)', () => {
+  assert.equal(initialState().settings.legsAuto, false);
+});
