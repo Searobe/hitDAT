@@ -93,6 +93,21 @@ ol.steps li { margin: 6px 0; }
 
 svg.chart { width: 100%; height: auto; display: block; }
 svg.chart text { fill: var(--dim); font-size: 11px; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; color: var(--dim); margin-top: 6px; }
+.legend i, .cal i i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
+.k-session { background: var(--accent); }
+.k-test { background: var(--ok); }
+.k-legs { background: #4aa3ff; }
+.k-pump { background: #c58bff; }
+.cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 8px; }
+.cal b { font-size: 11px; font-weight: 500; color: var(--dim); text-align: center; }
+.cal span { background: var(--bg); border-radius: 8px; aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; }
+.cal span em { font-style: normal; font-size: 12px; color: var(--dim); }
+.cal span.did em { color: var(--text); }
+.cal span.today { outline: 2px solid var(--accent); }
+.cal span.future { opacity: .35; }
+.cal span > i { display: flex; gap: 2px; height: 6px; }
+.cal i i { width: 6px; height: 6px; margin: 0; }
 
 .credit { margin-top: 28px; text-align: center; font-size: 12px; color: var(--dim); opacity: .7; }
 
