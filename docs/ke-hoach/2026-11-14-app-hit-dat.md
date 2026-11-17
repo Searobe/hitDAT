@@ -38,10 +38,15 @@ Ngày: 14/11/2026 · Một mốc, một PR · Trạng thái: đã làm, chờ th
 
 ## Thế nào là xong
 
-- `npm test` xanh (16 ca).
+- `npm test` xanh (lúc làm: 16 ca của phần hít đất; nay tổng 40 ca, 16 ca ở `test/program.test.js`).
 - Chạy thử bằng trình duyệt giả lập iPhone: bài thử → buổi 5 hiệp → tổng kết, không lỗi; camera giả sáng/tối đếm đúng 7/7.
 - Âm thanh (14/11): bíp to hơn mỗi lượt hoặc đọc số còn lại, nhạc ngắn khi xong hiệp, nhạc mừng khi xong bài; đặt kiểu âm thanh «playback» để kêu cả khi gạt im lặng — chưa thử trên iPhone thật.
 - Chưa kiểm được: camera trên iPhone thật (tự chỉnh độ sáng của máy có thể làm tín hiệu yếu đi), giữ màn hình sáng, tiếng bíp khi bật chế độ im lặng. Cần thử trên máy thật.
+
+## Chạy không cần mạng và cập nhật
+
+- `sw.js` lưu mọi file của app để mở được khi mất mạng. Có mạng thì hỏi máy chủ trước (bỏ qua bộ nhớ đệm 10 phút của trình duyệt); quá 4 giây hoặc mất mạng thì dùng bản đã lưu. App tự tải lại khi có bản mới, trừ khi đang giữa buổi tập.
+- Số bản `VERSION` (`app.js`) phải bằng số ở `CACHE` (`sw.js`) và tăng mỗi khi đổi một file trong danh sách lưu ngoại tuyến; số bản hiện ở chân trang để biết máy đang chạy bản nào (có ca kiểm).
 
 ## Giới hạn đã biết
 
