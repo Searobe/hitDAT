@@ -93,6 +93,21 @@ ol.steps li { margin: 6px 0; }
 
 svg.chart { width: 100%; height: auto; display: block; }
 svg.chart text { fill: var(--dim); font-size: 11px; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; color: var(--dim); margin-top: 6px; }
+.legend i, .cal i i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
+.k-session { background: var(--accent); }
+.k-test { background: var(--ok); }
+.k-legs { background: #4aa3ff; }
+.k-pump { background: #c58bff; }
+.cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 8px; }
+.cal b { font-size: 11px; font-weight: 500; color: var(--dim); text-align: center; }
+.cal span { background: var(--bg); border-radius: 8px; aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; }
+.cal span em { font-style: normal; font-size: 12px; color: var(--dim); }
+.cal span.did em { color: var(--text); }
+.cal span.today { outline: 2px solid var(--accent); }
+.cal span.future { opacity: .35; }
+.cal span > i { display: flex; gap: 2px; height: 6px; }
+.cal i i { width: 6px; height: 6px; margin: 0; }
 
 .credit { margin-top: 28px; text-align: center; font-size: 12px; color: var(--dim); opacity: .7; }
 
@@ -100,12 +115,16 @@ svg.chart text { fill: var(--dim); font-size: 11px; }
 svg.fig { width: 100%; max-width: 340px; height: auto; display: block; margin: 0 auto; }
 svg.fig .ground { stroke: var(--line); stroke-width: 2; stroke-linecap: round; }
 svg.fig .floor { fill: none; stroke: var(--line); stroke-width: .6; opacity: .8; }
-svg.fig .ol { fill: none; stroke: #eaf1ff; stroke-opacity: .9; stroke-width: .7; stroke-linejoin: round; stroke-linecap: round; }
-svg.fig .ol.far { stroke-opacity: .42; stroke-width: .6; }
-svg.fig .ol.leg { stroke-width: .8; }
-svg.fig .ol.arm { stroke-opacity: .75; stroke-width: .6; }
+svg.fig .ol { fill: none; stroke: #dfe9ff; stroke-opacity: .42; stroke-width: .55; stroke-linejoin: round; stroke-linecap: round; }
+svg.fig .ol.far { stroke-opacity: .2; stroke-width: .5; }
+svg.fig .ol.leg { stroke-width: .6; }
+svg.fig .ol.arm { stroke-opacity: .32; stroke-width: .5; }
 svg.fig .sk { fill: url(#fskin); stroke: none; }
 svg.fig .sk.far { fill: url(#ffar); }
+svg.fig .bone { fill: rgba(236, 226, 200, .09); stroke: #ece2c8; stroke-opacity: .62; stroke-width: .5; stroke-linejoin: round; stroke-linecap: round; }
+svg.fig .bone.far { stroke-opacity: .25; fill: none; }
+svg.fig .bone.spine { fill: none; stroke-width: 1.6; stroke-dasharray: 1.3 .9; stroke-opacity: .5; }
+svg.fig .bone.rib { fill: none; stroke-opacity: .4; }
 svg.fig .cue { fill: none; stroke: #ffffff; stroke-opacity: .5; stroke-width: .9; stroke-dasharray: 2.5 2.5; stroke-linecap: round; stroke-linejoin: round; }
 .pad .fig { max-height: 30vh; width: auto; }
 .pad .num.mid { font-size: min(34vw, 26vh); }
@@ -117,17 +136,21 @@ ul.tight li { margin: 4px 0; }
 
 /* Vùng cơ được tác động: đỏ = cơ chính, vàng = cơ phụ, xanh = cơ được kéo giãn */
 :root { --mus-main: #ff453a; --mus-extra: #ffb340; --mus-stretch: #40c8e0; }
-svg.fig .musg { fill: none; stroke-width: 3.2; stroke-linejoin: round; }
+svg.fig .musg { fill: none; stroke-width: 2.6; stroke-linejoin: round; }
 svg.fig .musg.main { stroke: var(--mus-main); }
 svg.fig .musg.extra { stroke: var(--mus-extra); }
 svg.fig .musg.stretch { stroke: var(--mus-stretch); }
-svg.fig .mus { stroke-width: .6; stroke-linejoin: round; fill-opacity: .55; }
+svg.fig .musg.ctx { stroke: none; }
+svg.fig .mus { stroke-width: .5; stroke-linejoin: round; fill-opacity: .5; }
 svg.fig .mus.main { fill: var(--mus-main); stroke: #ffd9d5; }
 svg.fig .mus.extra { fill: var(--mus-extra); stroke: #ffeccc; }
 svg.fig .mus.stretch { fill: var(--mus-stretch); stroke: #d4f6fb; }
+svg.fig .mus.ctx { fill: #d9a08c; fill-opacity: .1; stroke: #f1cdbd; stroke-opacity: .5; }
 svg.fig .mus.deep { stroke-dasharray: 2 1.4; }
-svg.fig .musl { fill: none; stroke: #fff; stroke-width: .45; stroke-linecap: round; stroke-linejoin: round; }
+svg.fig .musl { fill: none; stroke: #fff; stroke-width: .32; stroke-linecap: round; stroke-linejoin: round; stroke-opacity: .8; }
+svg.fig .musl.ctx { stroke: #f1cdbd; stroke-opacity: .42; }
 svg.fig .musl.stretch { stroke-dasharray: 3.5 2.2; }
+svg.fig .tdn { fill: #ece2c8; fill-opacity: .55; stroke: #ece2c8; stroke-opacity: .5; stroke-width: .25; }
 .mus-list { display: flex; flex-direction: column; gap: 4px; margin: 8px 0; font-size: 14px; }
 .mus-chip { display: flex; align-items: baseline; gap: 6px; }
 .mus-chip i { flex: none; width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
