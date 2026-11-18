@@ -7,6 +7,7 @@ import {
   EX, FEEL, legsLevel, legsPlan, pumpPlan, buildSteps, estimateMinutes, legsDone, doneOn, describe,
 } from './legs.js';
 import { figureSvg, startFigures, pauseFigure } from './figures.js';
+import { pushBars, activityGrid, gridSummary } from './progress.js';
 
 const KEY = 'hitdat.v1';
 const $app = document.getElementById('app');
@@ -166,7 +167,7 @@ const camera = {
 
 // ---------- Trang chính ----------
 // Số bản: tăng cùng lúc với CACHE trong sw.js. Hiện ở chân trang để biết máy đang chạy bản nào.
-const VERSION = 10;
+const VERSION = 11;
 const CREDIT = `<footer class="credit">Made by Searobe · © 2026 · v${VERSION}</footer>`;
 function render(html) {
   $app.innerHTML = html;
@@ -236,7 +237,7 @@ function viewHome() {
         </div>`).join('')}
     </div>` : ''}
 
-    ${tests.length ? `<h2>Tiến bộ qua các bài thử</h2><div class="card">${chart(tests)}</div>` : ''}
+    ${state.history.length ? `<h2>Quá trình tập</h2><div class="card">${progressCard()}</div>` : ''}
 
     <h2>Lịch sử</h2>
     <div class="card list">
@@ -292,22 +293,39 @@ function historyRow(h) {
   </div>`;
 }
 
-function chart(tests) {
-  const W = 320, H = 150, L = 28, R = 10, T = 10, B = 22;
-  const max = Math.max(GOAL, ...tests.map((t) => t.count));
-  const x = (i) => (tests.length === 1 ? (L + W - R) / 2 : L + (i * (W - L - R)) / (tests.length - 1));
+// Ô «Quá trình tập»: cột hít đất từng lần + lịch 4 tuần.
+function progressCard() {
+  const bars = pushBars(state.history, 10);
+  const grid = activityGrid(state.history, today(), 4);
+  const sum = gridSummary(state.history, grid);
+  return `
+    ${bars.length ? `<div class="dim small">Số cái hít đất mỗi lần</div>${barChart(bars)}
+    <div class="legend small"><span><i class="k-session"></i>Buổi tập (tổng cả buổi)</span><span><i class="k-test"></i>Bài thử (một hơi)</span></div>` : ''}
+    <div class="dim small" style="margin-top:14px">4 tuần gần nhất · ${sum.days} ngày có tập · ${sum.reps} cái hít đất</div>
+    <div class="cal">
+      ${['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].map((d) => `<b>${d}</b>`).join('')}
+      ${grid.flat().map((c) => `<span class="${c.future ? 'future' : ''}${c.today ? ' today' : ''}${c.push || c.legs || c.pump ? ' did' : ''}">
+        <em>${+c.date.slice(8)}</em><i>${c.push ? '<i class="k-session"></i>' : ''}${c.legs ? '<i class="k-legs"></i>' : ''}${c.pump ? '<i class="k-pump"></i>' : ''}</i></span>`).join('')}
+    </div>
+    <div class="legend small"><span><i class="k-session"></i>Hít đất</span><span><i class="k-legs"></i>Tập chân</span><span><i class="k-pump"></i>Bơm máu</span></div>`;
+}
+
+function barChart(bars) {
+  const W = 320, H = 150, L = 6, R = 6, T = 18, B = 20;
+  const max = Math.max(10, ...bars.map((b) => b.value));
+  const slot = (W - L - R) / Math.max(bars.length, 5);
+  const bw = Math.min(30, slot * 0.62);
   const y = (v) => T + (1 - v / max) * (H - T - B);
-  const pts = tests.map((t, i) => `${x(i).toFixed(1)},${y(t.count).toFixed(1)}`).join(' ');
-  const step = Math.max(1, Math.ceil(tests.length / 6));
-  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Kết quả các bài thử">
-    <line x1="${L}" x2="${W - R}" y1="${y(GOAL)}" y2="${y(GOAL)}" stroke="#35c66b" stroke-dasharray="4 4"/>
-    <text x="${L - 4}" y="${y(GOAL) + 4}" text-anchor="end">${GOAL}</text>
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Số cái hít đất mỗi lần">
     <line x1="${L}" x2="${W - R}" y1="${y(0)}" y2="${y(0)}" stroke="#2c3036"/>
-    <text x="${L - 4}" y="${y(0) + 4}" text-anchor="end">0</text>
-    <polyline points="${pts}" fill="none" stroke="#ff7a1a" stroke-width="2.5" stroke-linejoin="round"/>
-    ${tests.map((t, i) => `<circle cx="${x(i)}" cy="${y(t.count)}" r="4" fill="#ff7a1a"/>
-      ${i % step === 0 || i === tests.length - 1 ? `<text x="${x(i)}" y="${y(t.count) - 8}" text-anchor="middle" style="fill:#f2f3f5">${t.count}</text>
-      <text x="${x(i)}" y="${H - 6}" text-anchor="middle">${fmtPast(t.date)}</text>` : ''}`).join('')}
+    ${bars.map((b, i) => {
+      const cx = L + slot * (i + 0.5);
+      const top = y(b.value);
+      return `<rect x="${(cx - bw / 2).toFixed(1)}" y="${top.toFixed(1)}" width="${bw.toFixed(1)}" height="${(y(0) - top).toFixed(1)}" rx="4"
+        fill="${b.kind === 'test' ? '#35c66b' : '#ff7a1a'}"${b.kind === 'session' && !b.passed ? ' fill-opacity=".55"' : ''}/>
+        <text x="${cx.toFixed(1)}" y="${(top - 5).toFixed(1)}" text-anchor="middle" style="fill:#f2f3f5">${b.value}</text>
+        <text x="${cx.toFixed(1)}" y="${H - 5}" text-anchor="middle">${fmtPast(b.date)}</text>`;
+    }).join('')}
   </svg>`;
 }
 

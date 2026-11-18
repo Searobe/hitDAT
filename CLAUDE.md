@@ -6,7 +6,7 @@ App tập hít đất: thử sức → lên lịch → đếm lượt, mục ti�
 
 - Web app tĩnh, không bước dựng, không thư viện ngoài. Chạy trên Safari iOS, thêm ra màn hình chính.
 - `program.js` — lõi chương trình tập, hàm thuần (mọi con số của chương trình ở đây).
-- `legs.js` — chương trình tập chân, hàm thuần (động tác, mức, chuỗi bước). `figures.js` — hình giải phẫu bóc da chuyển động theo pha (SVG, hàm thuần: tư thế khoá, khung xương, từng đầu cơ; cường độ cơ theo pha co – thả của từng động tác).
+- `progress.js` — số liệu ô «Quá trình tập» (cột hít đất, lịch 4 tuần), hàm thuần. `legs.js` — chương trình tập chân, hàm thuần (động tác, mức, chuỗi bước). `figures.js` — hình giải phẫu bóc da chuyển động theo pha (SVG, hàm thuần: tư thế khoá, khung xương, từng đầu cơ; cường độ cơ theo pha co – thả của từng động tác).
 - `app.js` — giao diện, camera, âm thanh, lưu trữ (`localStorage`, khoá `hitdat.v1`).
 - `sw.js` — chạy không cần mạng. `manifest.webmanifest`, `icons/` — cài ra màn hình chính.
 
