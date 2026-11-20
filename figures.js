@@ -537,13 +537,28 @@ function paint(svg, s) {
   const els = svg.querySelectorAll('.ol, .sk, .bone, .musg, .mus, .musl, .tdn');
   for (let i = 0; i < ops.length && i < els.length; i++) for (const k in ops[i].a) els[i].setAttribute(k, ops[i].a[k]);
 }
+// Vẽ tối đa khoảng 30 khung/giây và bỏ qua hình đang khuất ngoài màn hình,
+// để máy rảnh tay nhận chạm (trang hướng dẫn có 9 hình cùng lúc).
+const FRAME_MS = 30;
+let seen = null;
+function watch(svg, s) {
+  if (typeof IntersectionObserver !== 'function') return;
+  if (!seen) {
+    seen = new IntersectionObserver((list) => {
+      for (const e of list) { const st = live.get(e.target); if (st) st.visible = e.isIntersecting; }
+    });
+  }
+  s.visible = false; // chờ IntersectionObserver báo lần đầu (gọi ngay sau khi gắn)
+  seen.observe(svg);
+}
 function tick(now) {
   raf = 0;
+  if (last && now - last < FRAME_MS) { raf = requestAnimationFrame(tick); return; }
   const dt = last ? Math.min(0.1, (now - last) / 1000) : 0;
   last = now;
   for (const [svg, s] of live) {
-    if (!svg.isConnected) { live.delete(svg); continue; }
-    if (s.paused) continue;
+    if (!svg.isConnected) { live.delete(svg); if (seen) seen.unobserve(svg); continue; }
+    if (s.paused || s.visible === false) continue;
     s.t += dt;
     paint(svg, s);
   }
@@ -553,7 +568,9 @@ export function startFigures(root = document) {
   if (typeof requestAnimationFrame !== 'function' || still()) return;
   root.querySelectorAll('svg.fig[data-fig]').forEach((svg) => {
     if (live.has(svg) || !FIG[svg.dataset.fig]) return;
-    live.set(svg, { id: svg.dataset.fig, dur: Number(svg.dataset.dur) || 3, t: 0, paused: false });
+    const s = { id: svg.dataset.fig, dur: Number(svg.dataset.dur) || 3, t: 0, paused: false, visible: true };
+    live.set(svg, s);
+    watch(svg, s);
   });
   if (!raf && live.size) raf = requestAnimationFrame(tick);
 }

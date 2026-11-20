@@ -1,7 +1,7 @@
 // Giao diện + cảm biến. Luật chương trình tập nằm ở program.js.
 import {
   GOAL, initialState, planSession, applyTest, applySession, upcoming,
-  sessionPassed, makeRepDetector, chooseCalibration,
+  sessionPassed, makeRepDetector, chooseCalibration, canLower, applyLower,
 } from './program.js';
 import {
   EX, FEEL, legsLevel, legsPlan, pumpPlan, buildSteps, estimateMinutes, legsDone, doneOn, describe,
@@ -167,12 +167,17 @@ const camera = {
 
 // ---------- Trang chính ----------
 // Số bản: tăng cùng lúc với CACHE trong sw.js. Hiện ở chân trang để biết máy đang chạy bản nào.
-const VERSION = 11;
+const VERSION = 12;
 const CREDIT = `<footer class="credit">Made by Searobe · © 2026 · v${VERSION}</footer>`;
 function render(html) {
   $app.innerHTML = html;
   window.scrollTo(0, 0);
   startFigures($app);
+}
+// Màn đếm giờ chỉ đổi con số, không dựng lại cả màn: nút giữ nguyên nên chạm không bị mất giữa chừng.
+function setNum(n) {
+  const el = document.getElementById('num');
+  if (el) el.textContent = n;
 }
 function on(id, fn) {
   const el = document.getElementById(id);
@@ -190,6 +195,8 @@ function viewHome() {
   const up = upcoming(state);
   const next = up[0];
   const early = state.nextDate && today() < state.nextDate;
+  // Chỉ cho giảm khi buổi kế là buổi tập; bài thử thì đằng nào cũng xếp lại mức.
+  const lowerTo = next.type === 'session' && canLower(state) ? applyLower(state, today()).T : null;
 
   let nextCard;
   if (next.type === 'test') {
@@ -222,6 +229,7 @@ function viewHome() {
       ${early ? `<p class="small" style="color:var(--accent)">Cơ cần nghỉ ít nhất 1 ngày. Nên tập vào ${fmtDate(state.nextDate).toLowerCase()}.</p>` : ''}
       <div class="btns">
         <button class="${early ? '' : 'primary'}" id="go">${early ? 'Vẫn tập hôm nay' : next.type === 'test' ? 'Làm bài thử' : 'Bắt đầu buổi tập'}</button>
+        ${lowerTo != null ? `<button class="ghost" id="lower">Nặng quá? Giảm mức tập ${state.T} → ${lowerTo}</button>` : ''}
       </div>
     </div>
 
@@ -261,6 +269,13 @@ function viewHome() {
   on('go', () => startWorkout(next.type));
   bindLegs();
   on('retest', () => startWorkout('test'));
+  on('lower', () => {
+    const sets = setsText(planSession(lowerTo, next.day).sets);
+    if (!confirm(`Giảm mức tập từ ${state.T} xuống ${lowerTo}? ${DAY_NAME[next.day]} sẽ còn: ${sets}. Bài thử kế tiếp vẫn xếp lại mức theo kết quả thật.`)) return;
+    state = applyLower(state, today());
+    save();
+    viewHome();
+  });
   on('mode', () => { state.settings.mode = state.settings.mode === 'camera' ? 'touch' : 'camera'; save(); viewHome(); });
   on('sound', () => { state.settings.sound = !state.settings.sound; save(); unlockAudio(); beep(880); viewHome(); });
   on('count', () => {
@@ -281,6 +296,10 @@ function historyRow(h) {
   if (h.type === 'legs' || h.type === 'pump') {
     return `<div><div class="row"><span>${h.type === 'legs' ? 'Buổi chân · mức ' + h.level : 'Bơm máu bắp chân'}</span><span class="dim small">${fmtPast(h.date)}</span></div>
       <div class="dim small">${h.minutes} phút${h.skipped ? ' · bỏ qua ' + h.skipped + ' động tác' : ''}${h.feel ? ' · ' + FEEL[h.feel].toLowerCase() : ''}</div></div>`;
+  }
+  if (h.type === 'adjust') {
+    return `<div><div class="row"><span>Tự giảm mức tập</span><span class="dim small">${fmtPast(h.date)}</span></div>
+      <div class="small">${h.from} → <b>${h.to}</b></div></div>`;
   }
   if (h.type === 'test') {
     return `<div><div class="row"><span>Bài thử sức</span><span class="dim small">${fmtPast(h.date)}</span></div>
@@ -551,17 +570,15 @@ function legsRest(st, top) {
   const nextWork = legs.steps.slice(legs.i + 1).find((x) => x.type === 'work');
   const nextEx = nextWork ? EX[nextWork.ex] : null;
   const hint = nextWork ? `Kế tiếp: ${nextEx.name}${nextWork.side === 2 ? ' · chân trái' : nextWork.sets > 1 ? ` · hiệp ${nextWork.set}/${nextWork.sets}` : ''}` : '';
-  const draw = () => {
-    stage(`
+  stage(`
       <div class="pad rest">
         <div class="lbl">${st.label}</div>
-        <div class="num">${left}</div>
+        <div class="num" id="num">${left}</div>
         <div class="hint">${hint}</div>
       </div>
       <div class="btns"><button id="skip">Vào luôn</button></div>`, { top });
-    on('skip', () => { beep(1320, 220); legsNext(); });
-  };
-  draw();
+  on('skip', () => { beep(1320, 220); legsNext(); });
+  const draw = () => setNum(left);
   every(() => {
     left -= 1;
     if (left <= 0) { beep(1320, 220); legsNext(); return; }
@@ -705,10 +722,8 @@ async function openCamera() {
 function countdown(sec, done, label = 'Vào tư thế chống tay', onTick) {
   clearTimers();
   let left = sec;
-  const draw = () => {
-    stage(`<div class="pad rest"><div class="lbl">${label}</div><div class="num">${left}</div></div>`, { quit: true });
-  };
-  draw();
+  stage(`<div class="pad rest"><div class="lbl">${label}</div><div class="num" id="num">${left}</div></div>`, { quit: true });
+  const draw = () => setNum(left);
   beep(660, 60);
   every(() => {
     left -= 1;
@@ -848,21 +863,19 @@ function rest(sec) {
   const w = workout;
   w.phase = 'rest';
   let left = sec;
-  const draw = () => {
-    stage(`
+  stage(`
       <div class="pad rest">
         <div class="lbl">Nghỉ. Vừa xong: ${w.done.at(-1)} cái</div>
-        <div class="num">${left}</div>
+        <div class="num" id="num">${left}</div>
         <div class="hint">Hiệp kế (${w.set + 1}/5): <b>${w.plan.sets[w.set]}${w.set === 4 ? '+' : ''}</b> cái</div>
       </div>
       <div class="btns two">
         <button id="more">+30 giây</button>
         <button id="skip">Vào hiệp luôn</button>
       </div>`, { top: `Đã xong ${w.set}/5 hiệp` });
-    on('more', () => { left += 30; draw(); });
-    on('skip', () => { clearTimers(); beep(1320, 220); beginSet(); });
-  };
-  draw();
+  const draw = () => setNum(left);
+  on('more', () => { left += 30; draw(); });
+  on('skip', () => { clearTimers(); beep(1320, 220); beginSet(); });
   every(() => {
     left -= 1;
     if (left <= 0) { clearTimers(); beep(1320, 220); beginSet(); return; }
@@ -928,6 +941,8 @@ function finishWorkout() {
 }
 
 // ---------- Khởi động ----------
+// Safari iOS chỉ hiện hiệu ứng nhấn (:active) khi trang có lắng nghe chạm.
+document.addEventListener('touchstart', () => {}, { passive: true });
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible' && workout && workout.phase !== 'summary') keepAwake(true);
 });
