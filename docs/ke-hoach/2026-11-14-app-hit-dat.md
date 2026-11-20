@@ -30,6 +30,7 @@ Ngày: 14/11/2026 · Một mốc, một PR · Trạng thái: đã làm, chờ th
 - Buổi kế cách buổi trước 2 ngày lịch (nghỉ trọn ít nhất 1 ngày); app nhắc, không khoá.
 - Hết tuần: đạt ≥ 2/3 buổi thì T tăng 12% (hiệp cuối buổi nặng ≥ 1,5 lần mức tối thiểu thì 20%); hụt thì giữ; hụt hai tuần liền thì lùi 10%.
 - Cứ 2 tuần thử lại, T = đúng kết quả thử. Thử được 100 là về đích.
+- Tự giảm mức (20/11): trang chính có nút «Nặng quá? Giảm mức tập» khi buổi kế là buổi tập. Mỗi lần bấm hạ T 10% (ít nhất 1 cái, không dưới 3), có hỏi xác nhận, ghi vào lịch sử dạng `{type: 'adjust', from, to}`. Bước 10% dùng lại đúng bước lùi khi hụt hai tuần liền ở trên, chỉ là để người tập chủ động khi bài thử bốc hơn sức thật; không tăng liều nên không thêm nguồn mới. Lịch tuần không đổi, bài thử kế tiếp vẫn xếp lại T theo kết quả thật. Lần giảm không tính là ngày tập trong ô «Quá trình tập». Hình dạng dữ liệu không đổi (chỉ thêm một loại dòng lịch sử) nên giữ `v: 1`.
 
 ## Cách đếm
 
@@ -47,6 +48,14 @@ Ngày: 14/11/2026 · Một mốc, một PR · Trạng thái: đã làm, chờ th
 
 - `sw.js` lưu mọi file của app để mở được khi mất mạng. Có mạng thì hỏi máy chủ trước (bỏ qua bộ nhớ đệm 10 phút của trình duyệt); quá 4 giây hoặc mất mạng thì dùng bản đã lưu. App tự tải lại khi có bản mới, trừ khi đang giữa buổi tập.
 - Số bản `VERSION` (`app.js`) phải bằng số ở `CACHE` (`sw.js`) và tăng mỗi khi đổi một file trong danh sách lưu ngoại tuyến; số bản hiện ở chân trang để biết máy đang chạy bản nào (có ca kiểm).
+
+## Nút bấm trên iPhone (20/11)
+
+- Gắn sự kiện chạm ở `document` để Safari iOS hiện hiệu ứng nhấn; nút thu nhỏ 4% và sáng rõ khi nhấn; `touch-action: manipulation` cho nút.
+- Màn đếm ngược, nghỉ giữa hiệp, nghỉ bài chân chỉ đổi con số mỗi giây, không dựng lại cả màn (trước đây nút bị thay mỗi giây nên chạm đúng lúc đó bị mất).
+- `touch-action: none` chỉ còn ở vùng đếm chạm, không phủ cả màn tập (để chữ dài trong màn tập cuộn được).
+- Hình động: vẽ tối đa khoảng 30 khung/giây, hình khuất ngoài màn hình thì dừng (trang hướng dẫn có 9 hình).
+- Đã kiểm bằng trình duyệt giả lập iPhone 13: nút giữ nguyên qua các giây, «+30 giây» cộng đúng, chỉ hình trong màn hình chạy. Chưa thử trên iPhone thật.
 
 ## Giới hạn đã biết
 

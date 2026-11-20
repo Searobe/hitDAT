@@ -75,6 +75,22 @@ export function applyTest(state, count, date) {
   return s;
 }
 
+// Người tập tự giảm mức khi bài quá nặng (vd. bài thử bốc hơn sức thật): mỗi lần hạ T 10%, ít nhất 1 cái.
+// Ghi vào lịch sử; lịch tuần, ngày buổi kế không đổi. Bài thử kế tiếp vẫn xếp lại T theo kết quả thật.
+export const ADJUST_FACTOR = 0.9;
+export function canLower(state) {
+  return state.T != null && state.T > MIN_T;
+}
+export function applyLower(state, date) {
+  if (!canLower(state)) return state;
+  const s = structuredClone(state);
+  const from = s.T;
+  s.T = Math.max(MIN_T, Math.min(from - 1, Math.round(from * ADJUST_FACTOR)));
+  s.failStreak = 0;
+  s.history.push({ type: 'adjust', date, from, to: s.T });
+  return s;
+}
+
 export function sessionPassed(plan, done) {
   return plan.every((n, i) => (done[i] || 0) >= n);
 }

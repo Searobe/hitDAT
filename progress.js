@@ -23,6 +23,7 @@ export function activityGrid(history, endDate, weeks = 4) {
   const start = addDays(endDate, -weekday(endDate) - 7 * (weeks - 1));
   const byDate = new Map();
   for (const h of history) {
+    if (h.type === 'adjust') continue; // tự giảm mức không phải buổi tập
     const k = h.type === 'session' || h.type === 'test' ? 'push' : h.type;
     if (!byDate.has(h.date)) byDate.set(h.date, new Set());
     byDate.get(h.date).add(k);
@@ -47,7 +48,7 @@ export function activityGrid(history, endDate, weeks = 4) {
 export function gridSummary(history, grid) {
   const from = grid[0][0].date;
   const to = grid.flat().filter((c) => !c.future).pop().date;
-  const inRange = history.filter((h) => h.date >= from && h.date <= to);
+  const inRange = history.filter((h) => h.type !== 'adjust' && h.date >= from && h.date <= to);
   return {
     days: new Set(inRange.map((h) => h.date)).size,
     reps: inRange.reduce((a, h) => a + (h.type === 'session' ? h.total : h.type === 'test' ? h.count : 0), 0),

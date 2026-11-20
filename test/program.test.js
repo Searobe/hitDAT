@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   planSession, restFor, addDays, initialState, applyTest, applySession,
-  upcoming, makeRepDetector, chooseCalibration, GOAL,
+  upcoming, makeRepDetector, chooseCalibration, GOAL, applyLower, canLower,
 } from '../program.js';
 
 test('kế hoạch buổi: 5 hiệp, người hít được 10 cái', () => {
@@ -143,4 +143,26 @@ test('hiệu chỉnh: chọn đặc trưng tách rõ nhất, từ chối khi hai
 
 test('cài đặt mặc định: màn hướng dẫn động tác chân đợi bấm «Bắt đầu» (không tự vào tập)', () => {
   assert.equal(initialState().settings.legsAuto, false);
+});
+
+test('tự giảm mức tập: hạ 10%, ít nhất 1 cái, không dưới mức thấp nhất, ghi lịch sử', () => {
+  let s = applyTest(initialState(), 40, '2026-11-20');
+  const before = structuredClone(s);
+  s = applyLower(s, '2026-11-21');
+  assert.equal(s.T, 36);
+  assert.deepEqual(s.history.at(-1), { type: 'adjust', date: '2026-11-21', from: 40, to: 36 });
+  // không đụng lịch tuần
+  assert.equal(s.day, before.day);
+  assert.equal(s.nextDate, before.nextDate);
+  assert.equal(s.pending, 'session');
+  // trạng thái gốc giữ nguyên (hàm thuần)
+  assert.equal(before.T, 40);
+  // mức nhỏ: vẫn hạ ít nhất 1
+  assert.equal(applyLower(applyTest(initialState(), 5, '2026-11-20'), '2026-11-21').T, 4);
+  // tới mức thấp nhất thì không hạ nữa, không ghi lịch sử
+  const floor = applyTest(initialState(), 3, '2026-11-20');
+  assert.equal(canLower(floor), false);
+  assert.equal(applyLower(floor, '2026-11-21'), floor);
+  // bài thử sau đó vẫn xếp lại theo kết quả thật
+  assert.equal(applyTest(s, 38, '2026-11-25').T, 38);
 });

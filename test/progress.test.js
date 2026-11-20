@@ -49,3 +49,15 @@ test('tóm tắt lịch: số ngày có tập và tổng số cái hít đất',
   const g = activityGrid(H, '2026-11-17', 4);
   assert.deepEqual(gridSummary(H, g), { days: 4, reps: 78 });
 });
+
+test('lần tự giảm mức không tính là ngày tập, không thành cột', () => {
+  const history = [
+    { type: 'test', date: '2026-11-16', count: 40 },
+    { type: 'adjust', date: '2026-11-17', from: 40, to: 36 },
+  ];
+  assert.equal(pushBars(history).length, 1);
+  const grid = activityGrid(history, '2026-11-20', 1);
+  const day17 = grid.flat().find((c) => c.date === '2026-11-17');
+  assert.equal(day17.push || day17.legs || day17.pump, false);
+  assert.deepEqual(gridSummary(history, grid), { days: 1, reps: 40 });
+});
