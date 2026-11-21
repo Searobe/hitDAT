@@ -413,8 +413,8 @@ function legsCard(pushupRestDay) {
       <div class="btns">
         <button id="legs" class="${primary ? 'primary' : ''}">Bắt đầu buổi chân</button>
         <button id="pump">${pumpToday ? '✓ Đã bơm máu hôm nay — làm lần nữa' : 'Bơm máu bắp chân 2 phút (mỗi ngày)'}</button>
-        ${pumpToday ? '' : '<button id="pumpLog" class="ghost">Đã tự tập bơm máu (không cầm máy) — ghi nhận</button>'}
-        ${pumpManual ? '<button id="pumpUndo" class="ghost">Bỏ lần ghi nhận bơm máu hôm nay</button>' : ''}
+        ${pumpToday ? '' : '<button id="pumpLog" class="ghost">Hoàn thành bơm máu</button>'}
+        ${pumpManual ? '<button id="pumpUndo" class="ghost">Bỏ đánh dấu hoàn thành bơm máu</button>' : ''}
         <button id="guide" class="ghost">Xem hình động tác và lưu ý</button>
       </div>
       <p class="dim small" style="margin-bottom:0">Đã tập ${n} buổi chân. ${level >= 3 ? 'Đang ở mức cao nhất.' : `Còn ${toNext} điểm nữa lên mức ${level + 1}.`} Cuối buổi chọn nhẹ / vừa / nặng: nhẹ +2 điểm, vừa +1, nặng giữ mức; hai buổi nặng liền thì lùi một mức.</p>
