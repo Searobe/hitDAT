@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  EX, legsLevel, legsPlan, pumpPlan, buildSteps, estimateMinutes, stepSeconds, legsDone, doneOn, describe,
+  EX, legsLevel, legsPlan, pumpPlan, buildSteps, estimateMinutes, stepSeconds, legsDone, doneOn, describe, pumpEntry, undoManualPump,
   REST_SET, REST_SIDE,
 } from '../legs.js';
 import { FIG, figureSvg } from '../figures.js';
@@ -94,4 +94,22 @@ test('mô tả liều tập', () => {
   assert.equal(describe({ ex: 'clam', sets: 2, n: 10 }), '2 × 10 lượt mỗi bên');
   assert.equal(describe({ ex: 'fig4', sets: 1, n: 30 }), '30 giây mỗi bên');
   assert.equal(describe({ ex: 'ankle', sets: 1, n: 20 }), '20 lượt');
+});
+
+test('ghi tay bơm máu: tính là đã bơm máu hôm đó, không tính điểm chân', () => {
+  const e = pumpEntry('2026-11-21');
+  assert.equal(e.type, 'pump');
+  assert.equal(e.manual, true);
+  assert.equal(doneOn([e], 'pump', '2026-11-21'), true);
+  assert.equal(legsLevel([e]).points, 0);
+  assert.equal(legsDone([e]), 0);
+});
+
+test('bỏ ghi tay: chỉ bỏ lần ghi tay gần nhất của đúng ngày, giữ lần tập có dẫn nhịp', () => {
+  const guided = { type: 'pump', date: '2026-11-21', minutes: 2, skipped: 0 };
+  const other = pumpEntry('2026-11-20');
+  const a = pumpEntry('2026-11-21');
+  const b = pumpEntry('2026-11-21');
+  assert.deepEqual(undoManualPump([other, guided, a, b], '2026-11-21'), [other, guided, a]);
+  assert.deepEqual(undoManualPump([other, guided], '2026-11-21'), [other, guided]);
 });

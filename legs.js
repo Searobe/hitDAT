@@ -144,6 +144,18 @@ export function estimateMinutes(steps) {
   return Math.round(steps.reduce((a, s) => a + stepSeconds(s), 0) / 60);
 }
 
+// Ghi tay bài bơm máu khi tập không cầm máy (đang tắm, tay ướt…): tính như một lần làm đủ.
+export const PUMP_MINUTES = 2;
+export const pumpEntry = (date) => ({ type: 'pump', date, level: 1, minutes: PUMP_MINUTES, skipped: 0, manual: true });
+// Bỏ lần ghi tay gần nhất của ngày đó (không đụng lần tập có dẫn nhịp).
+export function undoManualPump(history, date) {
+  for (let i = history.length - 1; i >= 0; i--) {
+    const h = history[i];
+    if (h.type === 'pump' && h.date === date && h.manual) return [...history.slice(0, i), ...history.slice(i + 1)];
+  }
+  return history;
+}
+
 export const legsDone = (history) => history.filter((h) => h.type === 'legs').length;
 export const doneOn = (history, type, date) => history.some((h) => h.type === type && h.date === date);
 
