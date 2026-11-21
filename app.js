@@ -4,7 +4,7 @@ import {
   sessionPassed, makeRepDetector, chooseCalibration, canLower, applyLower,
 } from './program.js';
 import {
-  EX, FEEL, legsLevel, legsPlan, pumpPlan, buildSteps, estimateMinutes, legsDone, doneOn, describe,
+  EX, FEEL, legsLevel, legsPlan, pumpPlan, buildSteps, estimateMinutes, legsDone, doneOn, describe, pumpEntry, undoManualPump,
 } from './legs.js';
 import { figureSvg, startFigures, pauseFigure } from './figures.js';
 import { pushBars, activityGrid, gridSummary } from './progress.js';
@@ -167,7 +167,7 @@ const camera = {
 
 // ---------- Trang chính ----------
 // Số bản: tăng cùng lúc với CACHE trong sw.js. Hiện ở chân trang để biết máy đang chạy bản nào.
-const VERSION = 12;
+const VERSION = 13;
 const CREDIT = `<footer class="credit">Made by Searobe · © 2026 · v${VERSION}</footer>`;
 function render(html) {
   $app.innerHTML = html;
@@ -295,7 +295,7 @@ function viewHome() {
 function historyRow(h) {
   if (h.type === 'legs' || h.type === 'pump') {
     return `<div><div class="row"><span>${h.type === 'legs' ? 'Buổi chân · mức ' + h.level : 'Bơm máu bắp chân'}</span><span class="dim small">${fmtPast(h.date)}</span></div>
-      <div class="dim small">${h.minutes} phút${h.skipped ? ' · bỏ qua ' + h.skipped + ' động tác' : ''}${h.feel ? ' · ' + FEEL[h.feel].toLowerCase() : ''}</div></div>`;
+      <div class="dim small">${h.manual ? 'Tự tập, ghi nhận sau' : h.minutes + ' phút'}${h.skipped ? ' · bỏ qua ' + h.skipped + ' động tác' : ''}${h.feel ? ' · ' + FEEL[h.feel].toLowerCase() : ''}</div></div>`;
   }
   if (h.type === 'adjust') {
     return `<div><div class="row"><span>Tự giảm mức tập</span><span class="dim small">${fmtPast(h.date)}</span></div>
@@ -399,6 +399,7 @@ function legsCard(pushupRestDay) {
   const mins = estimateMinutes(buildSteps(plan));
   const legsToday = doneOn(state.history, 'legs', t);
   const pumpToday = doneOn(state.history, 'pump', t);
+  const pumpManual = state.history.some((h) => h.type === 'pump' && h.date === t && h.manual);
   const note = legsToday ? 'Đã tập chân hôm nay ✓'
     : pushupRestDay ? 'Hôm nay nghỉ hít đất — hợp để tập chân.'
     : 'Hôm nay là ngày hít đất; buổi chân nên để ngày nghỉ.';
@@ -412,6 +413,8 @@ function legsCard(pushupRestDay) {
       <div class="btns">
         <button id="legs" class="${primary ? 'primary' : ''}">Bắt đầu buổi chân</button>
         <button id="pump">${pumpToday ? '✓ Đã bơm máu hôm nay — làm lần nữa' : 'Bơm máu bắp chân 2 phút (mỗi ngày)'}</button>
+        ${pumpToday ? '' : '<button id="pumpLog" class="ghost">Đã tự tập bơm máu (không cầm máy) — ghi nhận</button>'}
+        ${pumpManual ? '<button id="pumpUndo" class="ghost">Bỏ lần ghi nhận bơm máu hôm nay</button>' : ''}
         <button id="guide" class="ghost">Xem hình động tác và lưu ý</button>
       </div>
       <p class="dim small" style="margin-bottom:0">Đã tập ${n} buổi chân. ${level >= 3 ? 'Đang ở mức cao nhất.' : `Còn ${toNext} điểm nữa lên mức ${level + 1}.`} Cuối buổi chọn nhẹ / vừa / nặng: nhẹ +2 điểm, vừa +1, nặng giữ mức; hai buổi nặng liền thì lùi một mức.</p>
@@ -420,6 +423,8 @@ function legsCard(pushupRestDay) {
 function bindLegs() {
   on('legs', () => startLegs('legs'));
   on('pump', () => startLegs('pump'));
+  on('pumpLog', () => { state.history.push(pumpEntry(today())); save(); viewHome(); });
+  on('pumpUndo', () => { state.history = undoManualPump(state.history, today()); save(); viewHome(); });
   on('guide', viewGuide);
 }
 
