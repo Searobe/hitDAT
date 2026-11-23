@@ -1,8 +1,8 @@
 // Buổi hít đất và bài thử: chuẩn bị → đếm lượt → nghỉ → tổng kết.
-import { GOAL, planSession, applyTest, applySession, sessionPassed, makeRepDetector, chooseCalibration } from './program.js';
+import { GOAL, planSession, applyTest, applySession, sessionPassed, makeRepDetector, chooseCalibration, lastSetMode } from './program.js';
 import { makeCountdown } from './clock.js';
 import { db, save } from './data.js';
-import { today, fmtDate, setsText, DAY_NAME } from './format.js';
+import { today, fmtDate, setsText, DAY_NAME, lastSetAfter } from './format.js';
 import { run, show, stage, on, setNum, later, clearTimers, runCountdown, keepAwake } from './ui.js';
 import { camera } from './camera.js';
 import { unlockAudio, beep, soundTick, soundRep, soundSetDone, soundFinish } from './sound.js';
@@ -14,7 +14,7 @@ export function startWorkout(type, from = null) {
   unlockAudio();
   const plan = type === 'session' ? planSession(db.state.T, db.state.day) : null;
   run.workout = {
-    type, plan,
+    type, plan, last: type === 'session' ? lastSetMode(db.state.day) : 'max',
     set: from ? from.done.length : 0, done: from ? [...from.done] : [], count: 0, lastHit: 0,
     useCam: false, detector: null, phase: 'prep',
   };
@@ -31,7 +31,7 @@ async function viewPrep(note = '') {
   const title = w.type === 'test' ? 'Bài thử sức' : `Tuần ${db.state.week} · ${DAY_NAME[db.state.day]}`;
   const desc = w.type === 'test'
     ? 'Hít liền một hơi tới khi không lên nổi nữa. Giữ lưng thẳng, ngực hạ sát máy. Hết sức thì bấm «Xong».'
-    : `5 hiệp: <b>${setsText(w.plan.sets)}</b>. Số đếm lùi về 0 là xong hiệp, nghỉ ${w.plan.rest} giây rồi tự sang hiệp kế. Hiệp cuối hít tối đa rồi bấm «Xong».`;
+    : `5 hiệp: <b>${setsText(w.plan.sets)}</b>. Số đếm lùi về 0 là xong hiệp, nghỉ ${w.plan.rest} giây rồi tự sang hiệp kế. Hiệp cuối: đủ ${w.plan.sets[4]} cái, rồi ${lastSetAfter(w.last)} và bấm «Xong».`;
   stage(`
     <div class="scroll">
       <h1>${title}</h1>
@@ -144,9 +144,9 @@ function setView() {
   const tgt = target();
   if (w.type === 'test') return { num: w.count, cls: '', lbl: 'Bài thử: hít tối đa' };
   if (w.count < tgt) {
-    return { num: tgt - w.count, cls: '', lbl: isOpenSet() ? `Hiệp cuối: ít nhất ${tgt}, rồi hít tiếp tới hết sức` : `Hiệp ${w.set + 1}/5` };
+    return { num: tgt - w.count, cls: '', lbl: isOpenSet() ? `Hiệp cuối: ít nhất ${tgt}, rồi ${lastSetAfter(w.last)}` : `Hiệp ${w.set + 1}/5` };
   }
-  return { num: `+${w.count - tgt}`, cls: 'plus', lbl: `Đã đủ ${tgt}. Hít tiếp tới hết sức` };
+  return { num: `+${w.count - tgt}`, cls: 'plus', lbl: `Đã đủ ${tgt}. ${w.last === 'max' ? 'Hít tiếp tới hết sức' : 'Dừng khi còn hít được 1–2 cái nữa'}` };
 }
 // Mỗi lượt chỉ đổi con số và dòng chữ; vùng chạm giữ nguyên nên chạm liên tiếp không bị mất.
 function updateSet() {

@@ -1,6 +1,8 @@
 // Đọc – kiểm dữ liệu lưu, file sao lưu, buổi đang dở. Hàm thuần, không đụng DOM hay localStorage.
 // Giải thích ở docs/ke-hoach/2026-11-23-lam-lai.md (mốc 1).
-import { initialState } from './program.js';
+import { initialState, daysBetween } from './program.js';
+
+export { daysBetween };
 
 export const KEY = 'hitdat.v1';
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -43,11 +45,6 @@ export function parseBackup(text) {
   state.active = null;
   const dates = state.history.map((h) => h.date).sort();
   return { ok: true, state, summary: { entries: state.history.length, first: dates[0] || null, last: dates.at(-1) || null } };
-}
-
-export function daysBetween(a, b) {
-  const t = (ds) => { const [y, m, d] = ds.split('-').map(Number); return Date.UTC(y, m - 1, d); };
-  return Math.round((t(b) - t(a)) / 86400000);
 }
 
 // Nhắc sao lưu: đã có ít nhất 5 dòng lịch sử mà chưa sao lưu lần nào,

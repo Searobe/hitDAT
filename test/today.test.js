@@ -96,3 +96,23 @@ test('lịch sử đầy đủ: hiện từng phần, báo đúng số dòng cò
   assert.equal(historyGroups(history, 60).rest, 0);
   assert.deepEqual(historyGroups([]), { groups: [], rest: 0 });
 });
+
+test('nghỉ dài: trang Hôm nay kèm gợi ý khi việc chính là buổi hít đất trễ từ 7 ngày', () => {
+  const s = trained(); // T = 20, ngày nên tập 03/11
+  assert.equal(todayPlan(s, '2026-11-09').back, null);
+  const p = todayPlan(s, '2026-11-10');
+  assert.equal(p.main, 'push');
+  assert.deepEqual(p.back, { days: 7, lowerTo: 18 });
+  assert.equal(p.back.lowerTo, p.lowerTo); // cùng một mức với nút «Giảm mức tập» sẵn có
+  assert.equal(p.next.type, 'session');
+});
+
+test('nghỉ dài: buổi đang dở hoặc bài thử thì không gợi ý', () => {
+  const s = trained();
+  s.active = { kind: 'push', date: '2026-11-20', T: s.T, day: s.day, done: [10] };
+  assert.equal(todayPlan(s, '2026-11-20').main, 'push-resume');
+  assert.equal(todayPlan(s, '2026-11-20').back, null);
+  const t = trained();
+  t.pending = 'test';
+  assert.equal(todayPlan(t, '2026-11-20').back, null);
+});

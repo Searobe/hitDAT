@@ -24,4 +24,6 @@ export function fmtFull(ds) {
 }
 export const setsText = (sets) => sets.map((n, i) => (i === sets.length - 1 ? `${n}+` : n)).join(' · ');
 export const DAY_NAME = ['Buổi nhẹ', 'Buổi vừa', 'Buổi nặng'];
+// Lời dặn cho hiệp cuối sau khi đã đủ mức tối thiểu (mode: xem lastSetMode ở program.js).
+export const lastSetAfter = (mode) => (mode === 'max' ? 'hít tiếp tới hết sức' : 'dừng khi còn hít được 1–2 cái nữa');
 export const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));

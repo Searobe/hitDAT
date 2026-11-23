@@ -9,7 +9,7 @@ export const MIN_T = 3; // mức tập thấp nhất để hiệp không về 0
 
 // Cường độ theo buổi trong tuần (tỉ lệ so với mức tối đa T): nhẹ → vừa → nặng.
 const DAY_FACTOR = [0.5, 0.57, 0.65];
-// Dáng 5 hiệp: hiệp 2 cao nhất, hiệp 3–4 hạ xuống, hiệp 5 hít tối đa (số ghi là mức tối thiểu).
+// Dáng 5 hiệp: hiệp 2 cao nhất, hiệp 3–4 hạ xuống, hiệp 5 là hiệp mở (số ghi là mức tối thiểu; xem lastSetMode).
 const SET_SHAPE = [1, 1.2, 0.85, 0.85, 1];
 
 const clamp = (x, lo, hi) => Math.min(hi, Math.max(lo, x));
@@ -28,7 +28,17 @@ export function restFor(reps) {
   return 120;
 }
 
-// Kế hoạch một buổi: 5 hiệp; hiệp cuối là hít tối đa, số trả về là mức tối thiểu phải đạt.
+// Hiệp cuối (hiệp mở) của buổi: đạt mức tối thiểu rồi làm gì tiếp.
+//   'reserve' — buổi nhẹ, buổi vừa: dừng khi còn hít được 1–2 cái nữa
+//   'max'     — buổi nặng: hít tới hết sức (chỉ số này dùng để xét nhảy mức 20% ở applySession)
+// Chỉ là lời hướng dẫn: app không đo được sức còn lại nên không tự dừng hiệp, và luật đạt buổi / lên mức không đổi.
+// Nguồn ở docs/ke-hoach/2026-11-23-lam-lai.md (mốc 3).
+export const RESERVE_REPS = [1, 2];
+export function lastSetMode(day) {
+  return day >= SESSIONS_PER_WEEK - 1 ? 'max' : 'reserve';
+}
+
+// Kế hoạch một buổi: 5 hiệp; hiệp cuối là hiệp mở, số trả về là mức tối thiểu phải đạt.
 export function planSession(T, day) {
   const f = intensity(T, day);
   // Không hiệp nào vượt mức tối đa đã đo.
@@ -40,6 +50,11 @@ export function addDays(dateStr, n) {
   const [y, m, d] = dateStr.split('-').map(Number);
   const dt = new Date(Date.UTC(y, m - 1, d + n));
   return dt.toISOString().slice(0, 10);
+}
+
+export function daysBetween(a, b) {
+  const t = (ds) => { const [y, m, d] = ds.split('-').map(Number); return Date.UTC(y, m - 1, d); };
+  return Math.round((t(b) - t(a)) / 86400000);
 }
 
 export function initialState() {
@@ -93,6 +108,20 @@ export function applyLower(state, date) {
   return s;
 }
 
+// Nghỉ dài quay lại: trễ từ 7 ngày so với ngày nên tập thì trang Hôm nay gợi ý hạ mức 10% hoặc làm bài thử lại,
+// kèm nút tập mức cũ. Hàm này chỉ trả lời gợi ý, không đổi gì: người tập quyết.
+// Không gợi ý khi buổi kế vốn là bài thử (đằng nào cũng xếp lại mức), hoặc khi trong đợt trễ này
+// người tập đã tự hạ mức (có dòng 'adjust' từ ngày nên tập trở đi).
+// lowerTo = mức sau khi hạ 10%; null nếu đang ở mức thấp nhất (khi đó chỉ còn thử lại hoặc tập mức cũ).
+export const LONG_BREAK_DAYS = 7;
+export function comeback(state, today) {
+  if (state.T == null || state.pending !== 'session' || !state.nextDate) return null;
+  const days = daysBetween(state.nextDate, today);
+  if (days < LONG_BREAK_DAYS) return null;
+  if (state.history.some((h) => h.type === 'adjust' && h.date >= state.nextDate)) return null;
+  return { days, lowerTo: canLower(state) ? applyLower(state, today).T : null };
+}
+
 export function sessionPassed(plan, done) {
   return plan.every((n, i) => (done[i] || 0) >= n);
 }
@@ -114,7 +143,7 @@ export function applySession(state, done, date) {
   if (s.day >= SESSIONS_PER_WEEK) {
     const passes = s.weekLog.filter(Boolean).length;
     if (passes >= 2) {
-      // Đạt tuần: tăng 12%; hiệp cuối buổi nặng vượt 1,5 lần mức tối thiểu thì nhảy 20%.
+      // Đạt tuần: tăng 12%; hiệp cuối buổi nặng (buổi duy nhất hít hết sức) vượt 1,5 lần mức tối thiểu thì nhảy 20%.
       const strong = passed && (done[4] || 0) >= plan[4] * 1.5;
       s.T = Math.max(s.T + 1, Math.round(s.T * (strong ? 1.2 : 1.12)));
       s.failStreak = 0;

@@ -8,7 +8,7 @@ import './view-legs.js';
 import './view-workout.js';
 
 // Số bản: tăng cùng lúc với CACHE trong sw.js. Hiện ở chân trang để biết máy đang chạy bản nào.
-const VERSION = 15;
+const VERSION = 16;
 setCredit(`<footer class="credit">Made by Searobe · © 2026 · v${VERSION}</footer>`);
 
 // Safari iOS chỉ hiện hiệu ứng nhấn (:active) khi trang có lắng nghe chạm.
