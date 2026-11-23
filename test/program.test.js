@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   planSession, restFor, addDays, initialState, applyTest, applySession,
   upcoming, makeRepDetector, chooseCalibration, GOAL, applyLower, canLower,
+  sessionPassed, lastSetMode, RESERVE_REPS, comeback, LONG_BREAK_DAYS,
 } from '../program.js';
 
 test('kế hoạch buổi: 5 hiệp, người hít được 10 cái', () => {
@@ -165,4 +166,99 @@ test('tự giảm mức tập: hạ 10%, ít nhất 1 cái, không dưới mức
   assert.equal(applyLower(floor, '2026-11-21'), floor);
   // bài thử sau đó vẫn xếp lại theo kết quả thật
   assert.equal(applyTest(s, 38, '2026-11-25').T, 38);
+});
+
+// ---- Mốc 3: nghỉ dài quay lại, hiệp cuối chừa sức ----
+
+test('hiệp cuối: buổi nhẹ và buổi vừa chừa 1–2 cái, buổi nặng hít hết sức', () => {
+  assert.equal(lastSetMode(0), 'reserve');
+  assert.equal(lastSetMode(1), 'reserve');
+  assert.equal(lastSetMode(2), 'max');
+  assert.deepEqual(RESERVE_REPS, [1, 2]);
+});
+
+test('hiệp cuối chừa sức không đổi luật: đúng mức tối thiểu vẫn đạt buổi, tuần vẫn tăng 12%', () => {
+  let s = applyTest(initialState(), 20, '2026-11-01');
+  for (let d = 0; d < 3; d++) {
+    const plan = planSession(s.T, s.day).sets;
+    assert.equal(sessionPassed(plan, plan), true);
+    s = applySession(s, plan, s.nextDate);
+    assert.equal(s.history.at(-1).passed, true);
+  }
+  assert.equal(s.T, 22); // 20 × 1,12 = 22,4 → 22
+});
+
+test('luật lên mức không đổi: nhảy 20% chỉ xét hiệp cuối buổi nặng', () => {
+  const run3 = (extra) => {
+    let s = applyTest(initialState(), 20, '2026-11-01');
+    for (let d = 0; d < 3; d++) {
+      const plan = planSession(s.T, s.day).sets;
+      const done = [...plan];
+      done[4] = Math.ceil(plan[4] * extra[d]);
+      s = applySession(s, done, s.nextDate);
+    }
+    return s.T;
+  };
+  assert.equal(run3([2, 2, 1]), 22); // hít dư ở buổi nhẹ, buổi vừa: không nhảy 20%
+  assert.equal(run3([1, 1, 1.5]), 24); // buổi nặng vượt 1,5 lần: 20 × 1,2
+  assert.equal(run3([1, 1, 1.4]), 22);
+});
+
+test('luật lên mức không đổi: hụt tuần giữ mức, hụt hai tuần liền lùi 10%', () => {
+  let s = applyTest(initialState(), 20, '2026-11-01');
+  for (let d = 0; d < 3; d++) s = applySession(s, [0, 0, 0, 0, 0], s.nextDate);
+  assert.equal(s.T, 20);
+  s.pending = 'session';
+  for (let d = 0; d < 3; d++) s = applySession(s, [0, 0, 0, 0, 0], s.nextDate);
+  assert.equal(s.T, 18);
+});
+
+test('nghỉ dài: trễ dưới 7 ngày không gợi ý, từ 7 ngày thì gợi ý hạ 10%', () => {
+  const s = applyTest(initialState(), 40, '2026-11-01'); // ngày nên tập: 03/11
+  assert.equal(LONG_BREAK_DAYS, 7);
+  assert.equal(comeback(s, '2026-11-03'), null);
+  assert.equal(comeback(s, '2026-11-09'), null); // trễ 6 ngày
+  assert.deepEqual(comeback(s, '2026-11-10'), { days: 7, lowerTo: 36 });
+  assert.deepEqual(comeback(s, '2026-12-03'), { days: 30, lowerTo: 36 });
+  assert.equal(comeback(s, '2026-11-02'), null); // chưa tới ngày
+});
+
+test('nghỉ dài: chỉ gợi ý, không tự đổi gì', () => {
+  const s = applyTest(initialState(), 40, '2026-11-01');
+  const before = JSON.stringify(s);
+  comeback(s, '2026-12-25');
+  assert.equal(JSON.stringify(s), before);
+});
+
+test('nghỉ dài: không gợi ý khi chưa thử lần nào hoặc buổi kế là bài thử', () => {
+  assert.equal(comeback(initialState(), '2026-12-01'), null);
+  const s = applyTest(initialState(), 40, '2026-11-01');
+  s.pending = 'test';
+  assert.equal(comeback(s, '2026-12-01'), null);
+});
+
+test('nghỉ dài: đã hạ mức trong đợt trễ thì thôi gợi ý; hạ mức từ trước đó thì vẫn gợi ý', () => {
+  const s = applyTest(initialState(), 40, '2026-11-01');
+  const lowered = applyLower(s, '2026-11-20');
+  assert.equal(lowered.T, 36);
+  assert.equal(comeback(lowered, '2026-11-20'), null);
+  assert.equal(comeback(lowered, '2026-11-25'), null);
+  const early = applyLower(s, '2026-11-02'); // hạ trước ngày nên tập
+  assert.deepEqual(comeback(early, '2026-11-20'), { days: 17, lowerTo: 32 });
+  // tập xong một buổi thì ngày nên tập dời đi, hết trễ
+  const done = applySession(lowered, planSession(36, 0).sets, '2026-11-20');
+  assert.equal(comeback(done, '2026-11-22'), null);
+});
+
+test('nghỉ dài: đang ở mức thấp nhất thì không còn lựa chọn hạ mức', () => {
+  const s = applyTest(initialState(), 3, '2026-11-01');
+  assert.deepEqual(comeback(s, '2026-11-20'), { days: 17, lowerTo: null });
+});
+
+test('nghỉ dài: bài thử lại xếp mức theo kết quả thật và hết trễ', () => {
+  const s = applyTest(initialState(), 40, '2026-11-01');
+  const again = applyTest(s, 31, '2026-11-20');
+  assert.equal(again.T, 31);
+  assert.equal(comeback(again, '2026-11-22'), null);
+  assert.equal(again.history.length, 2); // lịch sử cũ còn nguyên
 });

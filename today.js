@@ -1,5 +1,5 @@
 // Trang «Hôm nay»: chọn MỘT việc chính cho hôm nay. Hàm thuần.
-import { upcoming, canLower, applyLower } from './program.js';
+import { upcoming, canLower, applyLower, comeback } from './program.js';
 import { legsLevel, legsPlan, pumpPlan, buildSteps, doneOn } from './legs.js';
 import { resumable } from './store.js';
 
@@ -27,6 +27,7 @@ export function legsResume(state, today) {
 //   'push'        tới ngày hít đất (buổi tập hoặc bài thử)
 //   'legs'        ngày nghỉ hít đất, chưa tập chân
 //   'rest'        hôm nay đã tập hít đất hoặc đã tập chân: không còn việc chính
+// back — nghỉ dài quay lại (chỉ khi việc chính là buổi hít đất): { days, lowerTo }, xem comeback() ở program.js.
 export function todayPlan(state, today) {
   const legsActive = legsResume(state, today);
   const legsToday = doneOn(state.history, 'legs', today);
@@ -43,5 +44,6 @@ export function todayPlan(state, today) {
     : 'rest';
   // Chỉ cho giảm khi buổi kế là buổi tập; bài thử thì đằng nào cũng xếp lại mức.
   const lowerTo = !pushActive && next.type === 'session' && canLower(state) ? applyLower(state, today).T : null;
-  return { main, next, early, pushActive, legsActive, legsToday, pushToday, lowerTo };
+  const back = main === 'push' ? comeback(state, today) : null;
+  return { main, next, early, pushActive, legsActive, legsToday, pushToday, lowerTo, back };
 }

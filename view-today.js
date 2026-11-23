@@ -1,10 +1,10 @@
 // Thẻ «Hôm nay»: một việc chính, các việc khác xếp thành danh sách bên dưới.
-import { GOAL, planSession, applyLower } from './program.js';
+import { GOAL, planSession, applyLower, lastSetMode } from './program.js';
 import { EX, legsLevel, legsPlan, buildSteps, estimateMinutes, doneOn, describe, pumpEntry, undoManualPump } from './legs.js';
 import { backupDue } from './store.js';
 import { todayPlan } from './today.js';
 import { db, save, peek, drop, KEY_BAD } from './data.js';
-import { today, fmtDate, fmtDay, fmtPast, setsText, DAY_NAME } from './format.js';
+import { today, fmtDate, fmtDay, fmtPast, setsText, DAY_NAME, lastSetAfter } from './format.js';
 import { route, show, render, on, confirmBox } from './ui.js';
 import { shareFile, backupNow, importData } from './backup.js';
 import { startWorkout } from './view-workout.js';
@@ -120,11 +120,27 @@ function heroCard(p) {
         <p class="dim small">Hít tối đa một hơi để xếp lại mức tập. Đủ ${GOAL} cái là về đích.</p>
         <div class="btns"><button class="primary" id="go">Làm bài thử</button></div></div>`;
     }
+    const last = `Hiệp cuối ít nhất ${n.sets[4]} cái, rồi ${lastSetAfter(lastSetMode(n.day))}.`;
+    if (p.back) {
+      // Nghỉ dài quay lại: app chỉ gợi ý, người tập chọn. Vẫn đúng một nút tô màu.
+      const b = p.back;
+      return `<div class="card hero">
+        <div class="eyebrow">Việc hôm nay · quay lại sau khi nghỉ</div>
+        <div class="title">Tuần ${state.week} · ${DAY_NAME[n.day]}</div>
+        ${chips(n.sets)}
+        <p class="small">Đã trễ ${b.days} ngày so với ngày nên tập. Nghỉ lâu thì buổi này có thể nặng hơn sức hiện tại: nên hạ mức hoặc thử lại. App không tự đổi gì.</p>
+        <p class="dim small">5 hiệp, nghỉ ${n.rest} giây giữa hiệp. ${last}</p>
+        <div class="btns">
+          ${b.lowerTo != null ? `<button class="primary" id="lower">Hạ mức tập 10%: ${state.T} → ${b.lowerTo}</button>` : ''}
+          <button id="retest">Làm bài thử lại để xếp mức</button>
+          <button class="${b.lowerTo != null ? 'ghost' : 'primary'}" id="go">Tập mức cũ (${state.T})</button>
+        </div></div>`;
+    }
     return `<div class="card hero">
       <div class="eyebrow">Việc hôm nay</div>
       <div class="title">Tuần ${state.week} · ${DAY_NAME[n.day]}</div>
       ${chips(n.sets)}
-      <p class="dim small">5 hiệp, nghỉ ${n.rest} giây giữa hiệp. Hiệp cuối hít tối đa, ít nhất ${n.sets[4]} cái.</p>
+      <p class="dim small">5 hiệp, nghỉ ${n.rest} giây giữa hiệp. ${last}</p>
       <div class="btns"><button class="primary" id="go">Bắt đầu buổi tập</button>${lower}</div></div>`;
   }
   if (p.main === 'legs') {
@@ -169,6 +185,7 @@ function viewToday({ keep = false } = {}) {
   on('legsResume', () => startLegs(p.legsActive.kind, p.legsActive));
   on('dropActive', () => { state.active = null; save(); show('today'); });
   on('lower', () => lowerLevel(p.lowerTo, p.next.day));
+  on('retest', () => startWorkout('test'));
   on('exportNow', backupNow);
   bindNotices();
   bindOthers(p);
@@ -210,7 +227,7 @@ function viewWelcome(p, keep) {
       <b>Cách chương trình chạy</b>
       <ol class="steps">
         <li>Làm <b>bài thử</b>: hít tối đa một hơi, đúng tư thế.</li>
-        <li>App xếp mức và lên lịch <b>3 buổi mỗi tuần</b>, mỗi buổi 5 hiệp, hiệp cuối hít tối đa.</li>
+        <li>App xếp mức và lên lịch <b>3 buổi mỗi tuần</b>, mỗi buổi 5 hiệp. Hiệp cuối: buổi nhẹ và buổi vừa chừa lại 1–2 cái, buổi nặng hít hết sức.</li>
         <li>Đạt tuần thì tăng mức, hụt thì lặp lại. Cứ <b>2 tuần thử lại</b> một lần để xếp lại mức.</li>
       </ol>
     </div>
