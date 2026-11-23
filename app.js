@@ -434,6 +434,8 @@ async function backupNow() {
   if (!workout) viewHome();
 }
 function importData() {
+  // Dữ liệu trên máy thuộc bản mới hơn: khôi phục lúc này sẽ đè lên nó, nên chờ app cập nhật đã.
+  if (readOnly) { alert('Dữ liệu trên máy thuộc bản app mới hơn. Hãy mở lại app để cập nhật rồi mới khôi phục.'); return; }
   const inp = document.createElement('input');
   inp.type = 'file';
   inp.accept = '.json,application/json';
@@ -449,7 +451,6 @@ function importData() {
     if (!confirm(`File sao lưu có ${inFile}. Thay dữ liệu đang có trên máy (${state.history.length} dòng lịch sử) bằng file này?`)) return;
     stash(KEY_PREV, JSON.stringify(state));
     state = r.state;
-    readOnly = false;
     save();
     viewHome();
   });
