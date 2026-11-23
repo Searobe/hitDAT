@@ -8,7 +8,8 @@ App tập hít đất: thử sức → lên lịch → đếm lượt, mục ti�
 - `program.js` — lõi chương trình tập, hàm thuần (mọi con số của chương trình ở đây).
 - `progress.js` — số liệu ô «Quá trình tập» (cột hít đất, lịch 4 tuần), hàm thuần. `legs.js` — chương trình tập chân, hàm thuần (động tác, mức, chuỗi bước). `figures.js` — hình giải phẫu bóc da chuyển động theo pha (SVG, hàm thuần: tư thế khoá, khung xương, từng đầu cơ; cường độ cơ theo pha co – thả của từng động tác).
 - `store.js` — đọc – kiểm dữ liệu lưu, file sao lưu, buổi đang dở; `clock.js` — đồng hồ đếm lùi theo giờ thật. Hàm thuần.
-- `app.js` — giao diện, camera, âm thanh, lưu trữ (`localStorage`, khoá `hitdat.v1`).
+- `app.js` — chỉ khởi động (số bản `VERSION`, đăng ký `sw.js`). Giao diện tách thành file nhỏ: `ui.js` (thanh 3 thẻ, dựng màn, màn tập phủ kín, hộp xác nhận trong app, công tắc, đồng hồ), `view-today.js` / `view-progress.js` / `view-settings.js` (3 thẻ Hôm nay · Tiến trình · Cài đặt), `view-workout.js` (buổi hít đất), `view-legs.js` (tập chân), `backup.js` (sao lưu – khôi phục), `data.js` (`localStorage`, khoá `hitdat.v1`), `sound.js`, `camera.js`, `format.js`.
+- `today.js` — chọn một việc chính cho trang Hôm nay, hàm thuần.
 - `sw.js` — chạy không cần mạng. `manifest.webmanifest`, `icons/` — cài ra màn hình chính.
 
 ## Chạy / kiểm / triển khai
@@ -25,4 +26,5 @@ App tập hít đất: thử sức → lên lịch → đếm lượt, mục ti�
 - Đổi hình dạng dữ liệu lưu thì tăng `v` và viết bước chuyển đổi; không làm mất lịch sử tập của người dùng. Dữ liệu không đọc được thì cất bản gốc (`hitdat.hong`) trước khi ghi; dữ liệu của bản mới hơn thì không ghi đè.
 - Hình camera chỉ đọc tại chỗ lấy độ sáng; không lưu, không gửi đi đâu. App không gọi mạng ngoài.
 - Camera chỉ chạy trên HTTPS hoặc localhost. Không thử được camera thật trong phiên đám mây — mọi thay đổi phần đếm phải ghi rõ «chưa thử trên iPhone thật» cho tới khi có người thử trên máy thật.
+- Giao diện: không gọi `confirm()` / `alert()` của trình duyệt (dùng `confirmBox` / `alertBox` ở `ui.js`); không khoá phóng to; cỡ chữ viết theo `--fs`, màu viết theo biến để chạy cả sáng lẫn tối; mỗi trang chỉ một nút tô màu (`primary`). Có ca kiểm ở `test/version.test.js`.
 - Chữ trên giao diện: tiếng Việt, trung tính như app cho mọi người dùng: gọi «bạn» hoặc không xưng hô.
