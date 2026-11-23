@@ -2,13 +2,15 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark light">
 <title>Hít Đất 100</title>
 <meta name="description" content="Tập hít đất tới 100 cái: thử sức, lên lịch, đếm lượt bằng camera hoặc chạm.">
-<meta name="theme-color" content="#101214">
+<meta name="theme-color" content="#101214" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Hít Đất">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
@@ -17,6 +19,20 @@
 </head>
 <body>
 <main id="app"></main>
+<nav id="tabs" aria-label="Mục chính">
+  <button type="button" data-tab="today">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5a9.5 9.5 0 1 0 0 19 9.5 9.5 0 0 0 0-19Zm4.6 7.4-5.2 5.6a1 1 0 0 1-1.45.02L7.4 12.9a1 1 0 1 1 1.44-1.4l1.8 1.87 4.5-4.83a1 1 0 0 1 1.46 1.36Z"/></svg>
+    <span>Hôm nay</span>
+  </button>
+  <button type="button" data-tab="progress">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="12" width="4.5" height="9" rx="1.2"/><rect x="9.75" y="7" width="4.5" height="14" rx="1.2"/><rect x="16.5" y="3" width="4.5" height="18" rx="1.2"/></svg>
+    <span>Tiến trình</span>
+  </button>
+  <button type="button" data-tab="settings">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h9.2a2.8 2.8 0 0 0 5.4 0H20a1 1 0 1 0 0-2h-1.4a2.8 2.8 0 0 0-5.4 0H4a1 1 0 1 0 0 2Zm16 5h-9.4a2.8 2.8 0 0 0-5.4 0H4a1 1 0 1 0 0 2h1.2a2.8 2.8 0 0 0 5.4 0H20a1 1 0 1 0 0-2Zm0 7h-1.4a2.8 2.8 0 0 0-5.4 0H4a1 1 0 1 0 0 2h9.2a2.8 2.8 0 0 0 5.4 0H20a1 1 0 1 0 0-2Z"/></svg>
+    <span>Cài đặt</span>
+  </button>
+</nav>
 <video id="cam" playsinline muted autoplay hidden></video>
 <script type="module" src="app.js"></script>
 </body>

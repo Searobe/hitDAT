@@ -54,3 +54,16 @@ export function gridSummary(history, grid) {
     reps: inRange.reduce((a, h) => a + (h.type === 'session' ? h.total : h.type === 'test' ? h.count : 0), 0),
   };
 }
+
+// Lịch sử đầy đủ, mới nhất trước, gom theo tháng. Chỉ lấy `shown` dòng đầu; rest = số dòng chưa hiện.
+// Dòng cùng ngày: dòng ghi sau đứng trước.
+export function historyGroups(history, shown = history.length) {
+  const all = history.map((h, i) => ({ h, i })).sort((a, b) => (a.h.date === b.h.date ? b.i - a.i : a.h.date < b.h.date ? 1 : -1));
+  const groups = [];
+  for (const { h } of all.slice(0, shown)) {
+    const month = h.date.slice(0, 7);
+    if (!groups.length || groups.at(-1).month !== month) groups.push({ month, label: `Tháng ${+month.slice(5)}/${month.slice(0, 4)}`, rows: [] });
+    groups.at(-1).rows.push(h);
+  }
+  return { groups, rest: Math.max(0, all.length - shown) };
+}
