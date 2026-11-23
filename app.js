@@ -8,22 +8,33 @@ import {
 } from './legs.js';
 import { figureSvg, startFigures, pauseFigure } from './figures.js';
 import { pushBars, activityGrid, gridSummary } from './progress.js';
+import { KEY, readStored, parseBackup, backupDue, resumable } from './store.js';
+import { makeCountdown } from './clock.js';
 
-const KEY = 'hitdat.v1';
+const KEY_BAD = 'hitdat.hong'; // bản gốc không đọc được, cất lại để không mất
+const KEY_PREV = 'hitdat.truoc'; // dữ liệu ngay trước lần khôi phục / xoá gần nhất
 const $app = document.getElementById('app');
 const $cam = document.getElementById('cam');
 
 // ---------- Lưu trữ ----------
+// readOnly: dữ liệu trên máy thuộc bản app mới hơn — không ghi đè, chờ app cập nhật.
+let readOnly = false;
 function load() {
-  try {
-    const s = JSON.parse(localStorage.getItem(KEY));
-    if (s && s.v === 1) return { ...initialState(), ...s, settings: { ...initialState().settings, ...s.settings } };
-  } catch {}
-  return initialState();
+  let raw = null;
+  try { raw = localStorage.getItem(KEY); } catch {}
+  const r = readStored(raw);
+  if (r.problem === 'ban-la') readOnly = true;
+  if (r.problem === 'hong') { try { localStorage.setItem(KEY_BAD, raw); } catch {} }
+  return r.state;
 }
 function save() {
+  if (readOnly) return;
   try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {}
 }
+function stash(key, text) {
+  try { localStorage.setItem(key, text); } catch {}
+}
+const peek = (key) => { try { return localStorage.getItem(key); } catch { return null; } };
 let state = load();
 
 // ---------- Tiện ích ----------
@@ -43,6 +54,10 @@ function fmtDate(ds) {
 function fmtPast(ds) {
   const [, m, d] = ds.split('-');
   return `${d}/${m}`;
+}
+function fmtFull(ds) {
+  const [y, m, d] = ds.split('-');
+  return `${d}/${m}/${y}`;
 }
 const setsText = (sets) => sets.map((n, i) => (i === sets.length - 1 ? `${n}+` : n)).join(' · ');
 const DAY_NAME = ['Buổi nhẹ', 'Buổi vừa', 'Buổi nặng'];
@@ -167,7 +182,7 @@ const camera = {
 
 // ---------- Trang chính ----------
 // Số bản: tăng cùng lúc với CACHE trong sw.js. Hiện ở chân trang để biết máy đang chạy bản nào.
-const VERSION = 13;
+const VERSION = 14;
 const CREDIT = `<footer class="credit">Made by Searobe · © 2026 · v${VERSION}</footer>`;
 function render(html) {
   $app.innerHTML = html;
@@ -196,7 +211,10 @@ function viewHome() {
   const next = up[0];
   const early = state.nextDate && today() < state.nextDate;
   // Chỉ cho giảm khi buổi kế là buổi tập; bài thử thì đằng nào cũng xếp lại mức.
-  const lowerTo = next.type === 'session' && canLower(state) ? applyLower(state, today()).T : null;
+  const active = resumable(state, today());
+  const pushActive = active && active.kind === 'push' ? active : null;
+  const lowerTo = !pushActive && next.type === 'session' && canLower(state) ? applyLower(state, today()).T : null;
+  const due = backupDue(state, today());
 
   let nextCard;
   if (next.type === 'test') {
@@ -212,6 +230,7 @@ function viewHome() {
 
   render(`
     <h1>Hít Đất 100</h1>
+    ${noticeCards()}
     <p class="dim small">${state.achieved ? '🏆 Bạn đã hít được ' + GOAL + ' cái một hơi. Tập tiếp để giữ phong độ.' : 'Mục tiêu: ' + GOAL + ' cái một hơi.'}</p>
 
     <div class="card">
@@ -227,13 +246,22 @@ function viewHome() {
     <div class="card">
       ${nextCard}
       ${early ? `<p class="small" style="color:var(--accent)">Cơ cần nghỉ ít nhất 1 ngày. Nên tập vào ${fmtDate(state.nextDate).toLowerCase()}.</p>` : ''}
+      ${pushActive ? `<p class="small" style="color:var(--accent)">Buổi hôm nay đang dở: đã xong ${pushActive.done.length}/5 hiệp (${pushActive.done.join(' · ')}).</p>` : ''}
       <div class="btns">
-        <button class="${early ? '' : 'primary'}" id="go">${early ? 'Vẫn tập hôm nay' : next.type === 'test' ? 'Làm bài thử' : 'Bắt đầu buổi tập'}</button>
+        ${pushActive ? `<button class="primary" id="resume">Tập tiếp từ hiệp ${pushActive.done.length + 1}</button>
+        <button class="ghost" id="drop">Bỏ buổi dở, tập lại từ đầu</button>`
+    : `<button class="${early ? '' : 'primary'}" id="go">${early ? 'Vẫn tập hôm nay' : next.type === 'test' ? 'Làm bài thử' : 'Bắt đầu buổi tập'}</button>`}
         ${lowerTo != null ? `<button class="ghost" id="lower">Nặng quá? Giảm mức tập ${state.T} → ${lowerTo}</button>` : ''}
       </div>
     </div>
 
     ${legsCard(early)}
+
+    ${due ? `<div class="card">
+      <b>Nên sao lưu dữ liệu</b>
+      <p class="dim small">${state.backupAt ? `Lần sao lưu gần nhất: ${fmtPast(state.backupAt)}.` : 'Chưa sao lưu lần nào.'} Lịch sử tập chỉ nằm trên máy này; iPhone có thể tự xoá dữ liệu của app web lâu không mở.</p>
+      <div class="btns"><button id="exportNow">Sao lưu ngay</button></div>
+    </div>` : ''}
 
     ${up.length > 1 ? `
     <h2>Lịch sắp tới</h2>
@@ -260,13 +288,18 @@ function viewHome() {
         <button id="count">Mỗi lượt hít: ${state.settings.count === 'voice' ? 'Đọc số' : 'Tiếng bíp'}</button>
         <button id="retest">Làm bài thử lại ngay</button>
         <button id="export">Sao lưu dữ liệu</button>
+        <button id="import">Khôi phục từ file sao lưu</button>
         <button id="reset" class="ghost danger">Xoá hết, làm lại từ đầu</button>
       </div>
+      <p class="dim small" style="margin-bottom:0">${state.backupAt ? `Lần sao lưu gần nhất: ${fmtPast(state.backupAt)}.` : 'Chưa sao lưu lần nào.'} File sao lưu nên cất vào Tệp hoặc iCloud.</p>
     </div>
     ${CREDIT}
   `);
 
   on('go', () => startWorkout(next.type));
+  on('resume', () => startWorkout('session', pushActive));
+  on('drop', () => { state.active = null; save(); viewHome(); });
+  bindNotices();
   bindLegs();
   on('retest', () => startWorkout('test'));
   on('lower', () => {
@@ -284,11 +317,37 @@ function viewHome() {
     if (state.settings.count === 'voice') say(3); else beep(880);
     viewHome();
   });
-  on('export', exportData);
+  on('export', backupNow);
+  on('exportNow', backupNow);
+  on('import', importData);
   on('reset', () => {
     if (confirm('Xoá toàn bộ lịch sử và bắt đầu lại từ bài thử đầu tiên?')) {
+      stash(KEY_PREV, JSON.stringify(state));
       state = initialState(); save(); viewHome();
     }
+  });
+}
+
+// Thông báo về dữ liệu: bản lạ (không ghi đè) và bản gốc không đọc được (đã cất lại).
+function noticeCards() {
+  let html = '';
+  if (readOnly) {
+    html += `<div class="card" style="color:var(--accent)"><b>Dữ liệu trên máy thuộc bản app mới hơn</b>
+      <p class="small" style="margin-bottom:0">Để không ghi đè, lần mở này app không lưu gì. Hãy đóng hẳn app rồi mở lại khi có mạng để cập nhật.</p></div>`;
+  }
+  if (peek(KEY_BAD)) {
+    html += `<div class="card"><b>Có dữ liệu cũ app không đọc được</b>
+      <p class="dim small">Bản gốc vẫn được giữ trên máy. Lưu ra file để giữ lại, rồi mới bỏ.</p>
+      <div class="btns two"><button id="badSave">Lưu bản gốc ra file</button><button id="badDrop" class="ghost">Bỏ bản gốc</button></div></div>`;
+  }
+  return html;
+}
+function bindNotices() {
+  on('badSave', () => shareFile(peek(KEY_BAD) || '', `hit-dat-ban-goc-${today()}.txt`, 'text/plain'));
+  on('badDrop', () => {
+    if (!confirm('Bỏ bản gốc không đọc được? Việc này không lấy lại được.')) return;
+    try { localStorage.removeItem(KEY_BAD); } catch {}
+    viewHome();
   });
 }
 
@@ -348,18 +407,61 @@ function barChart(bars) {
   </svg>`;
 }
 
-function exportData() {
-  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+// Đưa file cho người dùng: ưu tiên bảng chia sẻ của máy (lưu vào Tệp, iCloud, gửi đi), không được thì tải xuống.
+// Trả false nếu người dùng đóng bảng chia sẻ mà không lưu.
+async function shareFile(text, name, type) {
+  try {
+    const file = new File([text], name, { type });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file] });
+      return true;
+    }
+  } catch (e) {
+    if (e && e.name === 'AbortError') return false;
+  }
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `hit-dat-${today()}.json`;
+  a.href = URL.createObjectURL(new Blob([text], { type }));
+  a.download = name;
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  return true;
+}
+async function backupNow() {
+  const ok = await shareFile(JSON.stringify({ ...state, active: null }, null, 2), `hit-dat-${today()}.json`, 'application/json');
+  if (!ok) return;
+  state.backupAt = today();
+  save();
+  if (!workout) viewHome();
+}
+function importData() {
+  // Dữ liệu trên máy thuộc bản mới hơn: khôi phục lúc này sẽ đè lên nó, nên chờ app cập nhật đã.
+  if (readOnly) { alert('Dữ liệu trên máy thuộc bản app mới hơn. Hãy mở lại app để cập nhật rồi mới khôi phục.'); return; }
+  const inp = document.createElement('input');
+  inp.type = 'file';
+  inp.accept = '.json,application/json';
+  inp.hidden = true;
+  inp.addEventListener('change', async () => {
+    const f = inp.files && inp.files[0];
+    inp.remove();
+    if (!f) return;
+    const r = parseBackup(await f.text());
+    if (!r.ok) { alert(r.why); return; }
+    const { entries, first, last } = r.summary;
+    const inFile = entries ? `${entries} dòng lịch sử, từ ${fmtFull(first)} tới ${fmtFull(last)}` : 'chưa có lịch sử tập';
+    if (!confirm(`File sao lưu có ${inFile}. Thay dữ liệu đang có trên máy (${state.history.length} dòng lịch sử) bằng file này?`)) return;
+    stash(KEY_PREV, JSON.stringify(state));
+    state = r.state;
+    save();
+    viewHome();
+  });
+  document.body.appendChild(inp);
+  inp.click();
 }
 
 function viewWelcome() {
   render(`
     <h1>Hít Đất 100</h1>
+    ${noticeCards()}
     <p class="dim">Từ mức hiện tại của bạn tới 100 cái một hơi.</p>
     <div class="card">
       <b>Cách chương trình chạy</b>
@@ -381,11 +483,14 @@ function viewWelcome() {
     <div class="btns">
       <button class="primary" id="go">Làm bài thử đầu tiên</button>
       <button id="mode">Cách đếm: ${state.settings.mode === 'camera' ? 'Camera + chạm' : 'Chỉ chạm màn hình'}</button>
+      <button class="ghost" id="import">Đã có file sao lưu? Khôi phục</button>
     </div>
     ${legsCard(true)}
     ${CREDIT}
   `);
   on('go', () => startWorkout('test'));
+  on('import', importData);
+  bindNotices();
   bindLegs();
   on('mode', () => { state.settings.mode = state.settings.mode === 'camera' ? 'touch' : 'camera'; save(); viewWelcome(); });
 }
@@ -404,6 +509,7 @@ function legsCard(pushupRestDay) {
     : pushupRestDay ? 'Hôm nay nghỉ hít đất — hợp để tập chân.'
     : 'Hôm nay là ngày hít đất; buổi chân nên để ngày nghỉ.';
   const primary = pushupRestDay && !legsToday;
+  const la = legsActive();
   return `
     <h2>Tập chân</h2>
     <div class="card">
@@ -411,7 +517,8 @@ function legsCard(pushupRestDay) {
       <p class="dim small">${plan.map((i) => `${EX[i.ex].name} ${describe(i)}`).join(' · ')}</p>
       <p class="small" style="color:var(--accent)">${note}</p>
       <div class="btns">
-        <button id="legs" class="${primary ? 'primary' : ''}">Bắt đầu buổi chân</button>
+        ${la ? `<button id="legsResume" class="primary">Tập tiếp ${la.kind === 'pump' ? 'bài bơm máu' : 'buổi chân'} đang dở (động tác ${la.at}/${la.total})</button>` : ''}
+        <button id="legs" class="${primary && !la ? 'primary' : ''}">Bắt đầu buổi chân</button>
         <button id="pump">${pumpToday ? '✓ Đã bơm máu hôm nay — làm lần nữa' : 'Bơm máu bắp chân 2 phút (mỗi ngày)'}</button>
         ${pumpToday ? '' : '<button id="pumpLog" class="ghost">Hoàn thành bơm máu</button>'}
         ${pumpManual ? '<button id="pumpUndo" class="ghost">Bỏ đánh dấu hoàn thành bơm máu</button>' : ''}
@@ -420,7 +527,22 @@ function legsCard(pushupRestDay) {
       <p class="dim small" style="margin-bottom:0">Đã tập ${n} buổi chân. ${level >= 3 ? 'Đang ở mức cao nhất.' : `Còn ${toNext} điểm nữa lên mức ${level + 1}.`} Cuối buổi chọn nhẹ / vừa / nặng: nhẹ +2 điểm, vừa +1, nặng giữ mức; hai buổi nặng liền thì lùi một mức.</p>
     </div>`;
 }
+// Buổi chân / bơm máu đang dở còn nối lại được: cùng ngày, cùng mức, bước lưu còn nằm trong bài.
+function legsSteps(kind, level) {
+  return buildSteps(kind === 'pump' ? pumpPlan() : legsPlan(level), kind === 'pump' ? 10 : undefined);
+}
+function legsActive() {
+  const a = resumable(state, today());
+  if (!a || a.kind === 'push') return null;
+  const { level } = legsLevel(state.history);
+  if (a.kind === 'legs' && a.level !== level) return null;
+  const steps = legsSteps(a.kind, level);
+  if (a.i >= steps.length) return null;
+  const intros = (list) => list.filter((x) => x.type === 'intro').length;
+  return { ...a, at: intros(steps.slice(0, a.i + 1)), total: intros(steps) };
+}
 function bindLegs() {
+  on('legsResume', () => { const a = legsActive(); if (a) startLegs(a.kind, a); });
   on('legs', () => startLegs('legs'));
   on('pump', () => startLegs('pump'));
   on('pumpLog', () => { state.history.push(pumpEntry(today())); save(); viewHome(); });
@@ -471,11 +593,14 @@ function viewGuide() {
 
 // Trình dẫn tập: đi lần lượt qua các bước intro → work → rest, tự đếm nhịp.
 let legs = null;
-function startLegs(kind) {
+function startLegs(kind, from = null) {
   unlockAudio();
   const { level } = legsLevel(state.history);
-  const plan = kind === 'pump' ? pumpPlan() : legsPlan(level);
-  legs = { kind, level, steps: buildSteps(plan, kind === 'pump' ? 10 : undefined), i: 0, started: Date.now(), skipped: 0, paused: false };
+  legs = {
+    kind, level, steps: legsSteps(kind, level), paused: false, pauseWork: null,
+    i: from ? from.i : 0, skipped: from ? from.skipped : 0, started: Date.now() - (from ? from.elapsed || 0 : 0),
+  };
+  if (!from && state.active) { state.active = null; save(); }
   workout = { phase: 'legs' }; // để giữ màn hình sáng khi quay lại app
   keepAwake(true);
   legsStep();
@@ -491,8 +616,14 @@ function legsSkipExercise() {
 }
 function legsStep() {
   clearTimers();
+  legs.pauseWork = null;
   if (legs.i >= legs.steps.length) return legsFinish();
   const st = legs.steps[legs.i];
+  // Sang động tác mới thì ghi lại chỗ đang tập, để app bị đóng giữa chừng vẫn tập tiếp được.
+  if (st.type === 'intro' && legs.i > 0) {
+    state.active = { kind: legs.kind, date: today(), level: legs.level, i: legs.i, skipped: legs.skipped, elapsed: Date.now() - legs.started };
+    save();
+  }
   const total = legs.steps.filter((x) => x.type === 'intro').length;
   const idx = legs.steps.slice(0, legs.i + 1).filter((x) => x.type === 'intro').length;
   const top = `Động tác ${idx}/${total}`;
@@ -503,7 +634,7 @@ function legsStep() {
 function legsIntro(st, top) {
   const ex = EX[st.ex];
   const auto = !!state.settings.legsAuto;
-  let left = st.sec;
+  const left = st.sec;
   stage(`
     <div style="flex:1;overflow:auto">
       <h1>${ex.name}</h1>
@@ -528,18 +659,16 @@ function legsIntro(st, top) {
     legsIntro(st, top);
   });
   if (!auto) return;
-  every(() => {
-    left -= 1;
-    if (left <= 0) { beep(1320, 220); legsNext(); return; }
-    if (left <= 3) soundTick(left);
+  runCountdown(makeCountdown(st.sec, 1000, Date.now()), (n) => {
+    if (n <= 3) soundTick(n);
     const b = document.getElementById('now');
-    if (b) b.textContent = `Bắt đầu (${left})`;
-  }, 1000);
+    if (b) b.textContent = `Bắt đầu (${n})`;
+  }, () => { beep(1320, 220); legsNext(); });
 }
 function legsWork(st, top) {
   const ex = EX[st.ex];
   const hold = ex.kind === 'hold';
-  let left = st.n;
+  const left = st.n;
   const sideName = st.side === 1 ? 'Chân phải' : st.side === 2 ? 'Chân trái' : '';
   const lbl = [ex.name, st.sets > 1 ? `hiệp ${st.set}/${st.sets}` : '', sideName].filter(Boolean).join(' · ');
   stage(`
@@ -554,24 +683,27 @@ function legsWork(st, top) {
       <button id="skipex">Bỏ qua động tác</button>
     </div>`, { top });
   on('skipex', legsSkipExercise);
-  on('pause', () => {
-    legs.paused = !legs.paused;
-    document.getElementById('pause').textContent = legs.paused ? 'Tiếp tục' : 'Tạm dừng';
+  // Đếm lượt theo nhịp (hoặc đếm giây khi giữ) bằng giờ thật; tạm dừng thì đồng hồ đứng.
+  const cd = makeCountdown(st.n, hold ? 1000 : ex.tempo * 1000, Date.now());
+  const setPaused = (p) => {
+    if (p === legs.paused) return;
+    legs.paused = p;
+    if (p) cd.pause(Date.now()); else cd.resume(Date.now());
+    const b = document.getElementById('pause');
+    if (b) b.textContent = p ? 'Tiếp tục' : 'Tạm dừng';
     const svg = document.querySelector('.pad svg.fig');
-    if (svg) pauseFigure(svg, legs.paused);
-  });
+    if (svg) pauseFigure(svg, p);
+  };
   legs.paused = false;
-  every(() => {
-    if (legs.paused) return;
-    left -= 1;
-    const num = document.getElementById('num');
-    if (num) num.textContent = Math.max(0, left);
-    if (left <= 0) { soundSetDone(); legsNext(); return; }
-    if (hold) { if (left <= 3) soundTick(left); } else soundRep(left);
-  }, hold ? 1000 : ex.tempo * 1000);
+  legs.pauseWork = () => setPaused(true); // rời app giữa lúc đang dẫn nhịp thì tự tạm dừng
+  on('pause', () => setPaused(!legs.paused));
+  runCountdown(cd, (n) => {
+    setNum(n);
+    if (hold) { if (n <= 3) soundTick(n); } else soundRep(n);
+  }, () => { soundSetDone(); legsNext(); });
 }
 function legsRest(st, top) {
-  let left = st.sec;
+  const left = st.sec;
   const nextWork = legs.steps.slice(legs.i + 1).find((x) => x.type === 'work');
   const nextEx = nextWork ? EX[nextWork.ex] : null;
   const hint = nextWork ? `Kế tiếp: ${nextEx.name}${nextWork.side === 2 ? ' · chân trái' : nextWork.sets > 1 ? ` · hiệp ${nextWork.set}/${nextWork.sets}` : ''}` : '';
@@ -583,13 +715,10 @@ function legsRest(st, top) {
       </div>
       <div class="btns"><button id="skip">Vào luôn</button></div>`, { top });
   on('skip', () => { beep(1320, 220); legsNext(); });
-  const draw = () => setNum(left);
-  every(() => {
-    left -= 1;
-    if (left <= 0) { beep(1320, 220); legsNext(); return; }
-    if (left <= 3) soundTick(left);
-    draw();
-  }, 1000);
+  runCountdown(makeCountdown(st.sec, 1000, Date.now()), (n) => {
+    if (n <= 3) soundTick(n);
+    setNum(n);
+  }, () => { beep(1320, 220); legsNext(); });
 }
 function legsFinish() {
   clearTimers();
@@ -598,6 +727,8 @@ function legsFinish() {
   const totalEx = l.steps.filter((x) => x.type === 'intro').length;
   const minutes = Math.max(1, Math.round((Date.now() - l.started) / 60000));
   const counted = l.skipped < totalEx; // bỏ qua hết thì không ghi
+  state.active = null;
+  if (!counted) save();
   let entry = null;
   if (counted) {
     // Ghi ngay (chưa chọn cảm nhận thì tính như «vừa») để đóng app giữa chừng không mất buổi.
@@ -652,15 +783,29 @@ const timers = new Set();
 function later(fn, ms) { const t = setTimeout(() => { timers.delete(t); fn(); }, ms); timers.add(t); return t; }
 function every(fn, ms) { const t = setInterval(fn, ms); timers.add(t); return t; }
 function clearTimers() { timers.forEach((t) => { clearTimeout(t); clearInterval(t); }); timers.clear(); }
+// Chạy một đồng hồ đếm lùi (clock.js): gọi onLeft mỗi khi con số đổi, onDone khi về 0.
+// Hỏi giờ thật 5 lần mỗi giây; quay lại app sau khi khoá màn thì nhảy thẳng tới số đúng.
+function runCountdown(cd, onLeft, onDone) {
+  let shown = cd.left(Date.now());
+  every(() => {
+    const left = cd.left(Date.now());
+    if (left === shown) return;
+    shown = left;
+    if (left <= 0) { clearTimers(); onDone(); return; }
+    onLeft(left);
+  }, 200);
+}
 
-function startWorkout(type) {
+// from = buổi đang dở (store.js) thì vào tiếp ở hiệp chưa làm.
+function startWorkout(type, from = null) {
   unlockAudio();
   const plan = type === 'session' ? planSession(state.T, state.day) : null;
   workout = {
     type, plan,
-    set: 0, done: [], count: 0, lastHit: 0,
+    set: from ? from.done.length : 0, done: from ? [...from.done] : [], count: 0, lastHit: 0,
     useCam: false, detector: null, phase: 'prep',
   };
+  if (!from && state.active) { state.active = null; save(); }
   keepAwake(true);
   viewPrep();
 }
@@ -669,6 +814,7 @@ function endWorkout() {
   clearTimers();
   camera.stop();
   keepAwake(false);
+  if (state.active) { state.active = null; save(); }
   viewHome();
 }
 
@@ -694,6 +840,7 @@ async function viewPrep(note = '') {
     <div style="flex:1;overflow:auto">
       <h1>${title}</h1>
       <p>${desc}</p>
+      ${w.set > 0 ? `<div class="card" style="color:var(--accent)">Tập tiếp buổi đang dở: đã xong ${w.set}/5 hiệp (${w.done.join(' · ')}), vào tiếp hiệp ${w.set + 1}.</div>` : ''}
       ${note ? `<div class="card" style="color:var(--accent)">${note}</div>` : ''}
       <div class="card">
         <b>${wantCam ? 'Đếm bằng camera trước' : 'Đếm bằng chạm màn hình'}</b>
@@ -724,19 +871,14 @@ async function openCamera() {
 }
 
 // Đếm ngược chung: hiện số to, bíp mỗi giây, hết thì gọi done.
-function countdown(sec, done, label = 'Vào tư thế chống tay', onTick) {
+function countdown(sec, done, label = 'Vào tư thế chống tay') {
   clearTimers();
-  let left = sec;
-  stage(`<div class="pad rest"><div class="lbl">${label}</div><div class="num" id="num">${left}</div></div>`, { quit: true });
-  const draw = () => setNum(left);
+  stage(`<div class="pad rest"><div class="lbl">${label}</div><div class="num" id="num">${sec}</div></div>`, { quit: true });
   beep(660, 60);
-  every(() => {
-    left -= 1;
-    if (onTick) onTick(left);
-    if (left <= 0) { clearTimers(); beep(1320, 220); done(); return; }
+  runCountdown(makeCountdown(sec, 1000, Date.now()), (left) => {
     soundTick(left);
-    draw();
-  }, 1000);
+    setNum(left);
+  }, () => { beep(1320, 220); done(); });
 }
 
 // Hiệu chỉnh: đo hình ở tư thế cao rồi tư thế thấp, chọn đặc trưng tách rõ nhất.
@@ -800,22 +942,32 @@ function beginSet() {
   drawSet();
 }
 
-function drawSet() {
+// Con số và dòng chữ của màn đếm theo số lượt đã hít.
+function setView() {
   const w = workout;
   const tgt = target();
-  const open = isOpenSet();
-  let num, cls = '', lbl;
-  if (w.type === 'test') {
-    num = w.count; lbl = 'Bài thử: hít tối đa';
-  } else if (w.count < tgt) {
-    num = tgt - w.count; lbl = open ? `Hiệp cuối: ít nhất ${tgt}, rồi hít tiếp tới hết sức` : `Hiệp ${w.set + 1}/5`;
-  } else {
-    num = `+${w.count - tgt}`; cls = 'plus'; lbl = `Đã đủ ${tgt}. Hít tiếp tới hết sức`;
+  if (w.type === 'test') return { num: w.count, cls: '', lbl: 'Bài thử: hít tối đa' };
+  if (w.count < tgt) {
+    return { num: tgt - w.count, cls: '', lbl: isOpenSet() ? `Hiệp cuối: ít nhất ${tgt}, rồi hít tiếp tới hết sức` : `Hiệp ${w.set + 1}/5` };
   }
+  return { num: `+${w.count - tgt}`, cls: 'plus', lbl: `Đã đủ ${tgt}. Hít tiếp tới hết sức` };
+}
+// Mỗi lượt chỉ đổi con số và dòng chữ; vùng chạm giữ nguyên nên chạm liên tiếp không bị mất.
+function updateSet() {
+  const { num, cls, lbl } = setView();
+  const n = document.getElementById('num');
+  if (n) { n.textContent = num; n.className = `num ${cls}`; }
+  const l = document.getElementById('lbl');
+  if (l) l.textContent = lbl;
+}
+function drawSet() {
+  const w = workout;
+  const open = isOpenSet();
+  const { num, cls, lbl } = setView();
   const top = w.type === 'test' ? 'Bài thử sức' : `Hiệp ${w.set + 1}/5 · ${setsText(w.plan.sets)}`;
   stage(`
     <div class="pad" id="pad">
-      <div class="lbl">${lbl}</div>
+      <div class="lbl" id="lbl">${lbl}</div>
       <div class="num ${cls}" id="num">${num}</div>
       <div class="hint">${w.useCam ? 'Hạ ngực che máy, hoặc chạm vào đây' : 'Chạm mũi hoặc cằm vào đây mỗi lần hạ xuống'}</div>
     </div>
@@ -830,7 +982,7 @@ function drawSet() {
   const pad = document.getElementById('pad');
   pad.addEventListener('pointerdown', (e) => { e.preventDefault(); rep(); });
   on('finish', finishSet);
-  on('undo', () => { if (w.count > 0) { w.count -= 1; drawSet(); } });
+  on('undo', () => { if (w.count > 0) { w.count -= 1; updateSet(); } });
 }
 
 // Một lượt hít. Camera và chạm dùng chung khoảng chặn 400 ms để không đếm đôi.
@@ -845,8 +997,9 @@ function rep() {
   if (tgt && w.count === tgt) soundSetDone(); // số về 0: đủ hiệp
   else soundRep(tgt ? (w.count < tgt ? tgt - w.count : w.count - tgt) : w.count);
   if (tgt && !isOpenSet() && w.count >= tgt) { finishSet(); return; }
-  drawSet();
+  updateSet();
   const pad = document.getElementById('pad');
+  if (!pad) return;
   pad.classList.add('hit');
   later(() => pad.classList.remove('hit'), 120);
 }
@@ -860,6 +1013,9 @@ function finishSet() {
   if (w.type === 'test') return finishWorkout();
   w.set += 1;
   if (w.set >= w.plan.sets.length) return finishWorkout();
+  // Xong mỗi hiệp thì ghi lại, để app bị đóng giữa buổi vẫn tập tiếp được từ hiệp kế.
+  state.active = { kind: 'push', date: today(), T: state.T, day: state.day, done: [...w.done] };
+  save();
   rest(w.plan.rest);
 }
 
@@ -867,28 +1023,25 @@ function rest(sec) {
   clearTimers();
   const w = workout;
   w.phase = 'rest';
-  let left = sec;
+  const cd = makeCountdown(sec, 1000, Date.now());
   stage(`
       <div class="pad rest">
         <div class="lbl">Nghỉ. Vừa xong: ${w.done.at(-1)} cái</div>
-        <div class="num" id="num">${left}</div>
+        <div class="num" id="num">${sec}</div>
         <div class="hint">Hiệp kế (${w.set + 1}/5): <b>${w.plan.sets[w.set]}${w.set === 4 ? '+' : ''}</b> cái</div>
       </div>
       <div class="btns two">
         <button id="more">+30 giây</button>
         <button id="skip">Vào hiệp luôn</button>
       </div>`, { top: `Đã xong ${w.set}/5 hiệp` });
-  const draw = () => setNum(left);
-  on('more', () => { left += 30; draw(); });
+  on('more', () => { cd.add(30); setNum(cd.left(Date.now())); });
   on('skip', () => { clearTimers(); beep(1320, 220); beginSet(); });
-  every(() => {
-    left -= 1;
-    if (left <= 0) { clearTimers(); beep(1320, 220); beginSet(); return; }
+  runCountdown(cd, (left) => {
     // Sắp hết giờ nghỉ: hai tiếng bíp báo trước ở giây 10, rồi đếm ngược 5 giây cuối.
     if (left === 10) { beep(660, 120); beep(660, 120, 0.5, 200); }
     if (left <= 5) soundTick(left);
-    draw();
-  }, 1000);
+    setNum(left);
+  }, () => { beep(1320, 220); beginSet(); });
 }
 
 function finishWorkout() {
@@ -904,6 +1057,7 @@ function finishWorkout() {
   if (w.type === 'test') {
     const n = w.done[0];
     state = applyTest(state, n, today());
+    state.active = null;
     save();
     const reached = n >= GOAL;
     body = `
@@ -921,6 +1075,7 @@ function finishWorkout() {
     const passed = sessionPassed(plan, w.done);
     const lastOfWeek = state.day === 2;
     state = applySession(state, w.done, today());
+    state.active = null;
     save();
     const total = w.done.reduce((a, b) => a + b, 0);
     let verdict = passed ? 'Đạt đủ cả 5 hiệp.' : 'Buổi này hụt so với kế hoạch — không sao, tuần cần đạt 2 trong 3 buổi.';
@@ -949,8 +1104,16 @@ function finishWorkout() {
 // Safari iOS chỉ hiện hiệu ứng nhấn (:active) khi trang có lắng nghe chạm.
 document.addEventListener('touchstart', () => {}, { passive: true });
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible' && workout && workout.phase !== 'summary') keepAwake(true);
+  if (document.visibilityState !== 'visible') {
+    if (legs && legs.pauseWork) legs.pauseWork();
+    return;
+  }
+  if (workout && workout.phase !== 'summary') keepAwake(true);
+  // iOS ngắt âm thanh khi rời app; quay lại thì mở lại để bíp còn kêu.
+  try { if (actx && actx.state !== 'running') actx.resume().catch(() => {}); } catch {}
 });
+// Xin máy giữ dữ liệu lâu dài (được hay không do máy quyết; app ghim màn hình chính dễ được hơn).
+try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {}); } catch {}
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
   const idle = () => !workout || workout.phase === 'summary';
   let pendingReload = false;

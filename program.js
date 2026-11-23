@@ -57,6 +57,8 @@ export function initialState() {
     nextDate: null, // ngày sớm nhất nên tập buổi kế
     achieved: false,
     history: [],
+    backupAt: null, // ngày sao lưu gần nhất
+    active: null, // buổi đang dở, để mở lại app thì tập tiếp (xem store.js)
   };
 }
 
