@@ -1,5 +1,6 @@
 // Buổi hít đất và bài thử: chuẩn bị → đếm lượt → nghỉ → tổng kết.
 import { GOAL, planSession, applyTest, applySession, sessionPassed, makeRepDetector, chooseCalibration, lastSetMode } from './program.js';
+import { makeAdaptiveDetector } from './detect.js';
 import { makeCountdown } from './clock.js';
 import { db, save } from './data.js';
 import { today, fmtDate, setsText, DAY_NAME, lastSetAfter } from './format.js';
@@ -16,7 +17,7 @@ export function startWorkout(type, from = null) {
   run.workout = {
     type, plan, last: type === 'session' ? lastSetMode(db.state.day) : 'max',
     set: from ? from.done.length : 0, done: from ? [...from.done] : [], count: 0, lastHit: 0,
-    useCam: false, detector: null, phase: 'prep',
+    useCam: false, adaptive: false, camMiss: false, detector: null, phase: 'prep',
   };
   if (!from && db.state.active) { db.state.active = null; save(); }
   keepAwake(true);
@@ -28,6 +29,7 @@ async function viewPrep(note = '') {
   const w = run.workout;
   w.phase = 'prep';
   const wantCam = db.state.settings.mode === 'camera';
+  const manual = wantCam && !!db.state.settings.calibrate; // cách cũ: hiệu chỉnh tay trước buổi
   const title = w.type === 'test' ? 'Bài thử sức' : `Tuần ${db.state.week} · ${DAY_NAME[db.state.day]}`;
   const desc = w.type === 'test'
     ? 'Hít liền một hơi tới khi không lên nổi nữa. Giữ lưng thẳng, ngực hạ sát máy. Hết sức thì bấm «Xong».'
@@ -40,13 +42,17 @@ async function viewPrep(note = '') {
       ${note ? `<div class="card notice">${note}</div>` : ''}
       <div class="card">
         <b>${wantCam ? 'Đếm bằng camera trước' : 'Đếm bằng chạm màn hình'}</b>
-        <p class="dim small">${wantCam
+        <p class="dim small">${wantCam && !manual
+          ? 'Đặt máy nằm ngửa dưới ngực, camera trước không bị che khi chống tay. Máy tự nhận lượt khi ngực hạ xuống làm hình tối đi, không cần hiệu chỉnh. Chạm màn hình vẫn tính lượt.'
+          : wantCam
           ? 'Đặt máy nằm ngửa dưới ngực. Trước khi tập cần hiệu chỉnh khoảng 8 giây để máy biết tư thế cao và thấp trong ánh sáng nơi tập. Chạm màn hình vẫn tính lượt.'
           : 'Đặt máy nằm ngửa dưới mặt. Mỗi lần hạ xuống, chạm mũi hoặc cằm vào màn hình.'}</p>
       </div>
     </div>
     <div class="btns">
-      ${wantCam ? `<button class="primary" id="calib">Hiệu chỉnh rồi bắt đầu</button>
+      ${wantCam && !manual ? `<button class="primary" id="auto">Bắt đầu</button>
+        <button class="ghost" id="touch">Buổi này chỉ dùng chạm</button>`
+      : wantCam ? `<button class="primary" id="calib">Hiệu chỉnh rồi bắt đầu</button>
         ${db.state.calib ? '<button id="reuse">Dùng hiệu chỉnh lần trước</button>' : ''}
         <button class="ghost" id="touch">Buổi này chỉ dùng chạm</button>`
       : '<button class="primary" id="touch">Bắt đầu</button>'}
@@ -54,6 +60,7 @@ async function viewPrep(note = '') {
   `, { top: title });
 
   on('touch', () => { unlockAudio(); w.useCam = false; countdown(5, beginSet); });
+  on('auto', async () => { unlockAudio(); if (await openCamera()) { watchAdaptive(); countdown(5, beginSet); } });
   on('calib', async () => { unlockAudio(); if (await openCamera()) calibrate(); });
   on('reuse', async () => { unlockAudio(); if (await openCamera()) { w.useCam = true; countdown(5, beginSet); } });
 }
@@ -64,6 +71,22 @@ async function openCamera() {
     viewPrep('Không mở được camera (chưa cấp quyền hoặc máy không hỗ trợ). Hãy bấm «Buổi này chỉ dùng chạm», hoặc cấp quyền camera cho trang rồi thử lại.');
   }
   return ok;
+}
+
+// Đếm tự thích nghi (detect.js): camera chạy suốt buổi. Ngoài hiệp (đếm ngược, giờ nghỉ) bộ đếm chỉ học nền và nhiễu,
+// vào hiệp mới tính lượt — nên không cần bước hiệu chỉnh. Chưa thử trên iPhone thật.
+function watchAdaptive() {
+  const w = run.workout;
+  w.useCam = true;
+  w.adaptive = true;
+  w.detector = makeAdaptiveDetector();
+  camera.onSample = (s) => {
+    const hit = w.detector.feed(s.luma, performance.now());
+    if (w.phase !== 'set') return;
+    const dot = document.getElementById('dot');
+    if (dot) dot.className = w.detector.down ? 'down' : 'up';
+    if (hit) rep();
+  };
 }
 
 // Đếm ngược chung: hiện số to, bíp mỗi giây, hết thì gọi done.
@@ -121,7 +144,8 @@ function beginSet() {
   w.phase = 'set';
   w.count = 0;
   w.lastHit = 0;
-  if (w.useCam && db.state.calib) {
+  if (w.adaptive) w.detector.arm();
+  else if (w.useCam && db.state.calib) {
     const c = db.state.calib;
     w.detector = makeRepDetector();
     let ema = null;
@@ -204,7 +228,11 @@ function finishSet() {
   const w = run.workout;
   if (w.phase !== 'set') return;
   w.phase = 'between';
-  camera.onSample = null;
+  if (w.adaptive) {
+    // Cả hiệp camera không nhận được lượt nào: báo ở màn nghỉ để người tập chỉnh máy.
+    w.camMiss = w.count >= 3 && w.detector.hits === 0;
+    w.detector.disarm();
+  } else camera.onSample = null;
   w.done.push(w.count);
   if (w.type === 'test') return finishWorkout();
   w.set += 1;
@@ -225,6 +253,7 @@ function rest(sec) {
         <div class="lbl">Nghỉ. Vừa xong: ${w.done.at(-1)} cái</div>
         <div class="num" id="num">${sec}</div>
         <div class="hint">Hiệp kế (${w.set + 1}/5): <b>${w.plan.sets[w.set]}${w.set === 4 ? '+' : ''}</b> cái</div>
+        ${w.camMiss ? '<div class="hint">Hiệp vừa rồi camera không nhận được lượt nào. Xem lại chỗ đặt máy (dưới ngực, camera không bị che), hoặc bật «Hiệu chỉnh tay trước buổi» trong Cài đặt.</div>' : ''}
       </div>
       <div class="btns two">
         <button id="more">+30 giây</button>

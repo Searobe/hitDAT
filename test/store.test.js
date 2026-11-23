@@ -23,6 +23,19 @@ test('đọc dữ liệu lưu: giữ nguyên lịch sử, bù trường mới c�
   assert.equal(r.state.settings.legsAuto, false);
 });
 
+test('đọc dữ liệu lưu của bản 16: camera tự thích nghi là mặc định, hiệu chỉnh cũ và lịch sử còn nguyên', () => {
+  const old = trained();
+  delete old.settings.calibrate;
+  old.calib = { feature: 'luma', up: 180, down: 60 };
+  const r = readStored(JSON.stringify(old));
+  assert.equal(r.problem, null);
+  assert.equal(r.state.v, 1);
+  assert.equal(r.state.settings.mode, 'camera');
+  assert.equal(r.state.settings.calibrate, false);
+  assert.deepEqual(r.state.calib, old.calib);
+  assert.deepEqual(r.state.history, old.history);
+});
+
 test('đọc dữ liệu lưu: chuỗi hỏng hoặc sai hình dạng thì báo «hong» để bên gọi cất bản gốc', () => {
   for (const raw of ['{"v":1,"history":', 'null', '[]', '{"v":1}', '{"v":1,"history":[{"type":"test"}]}', '{"v":1,"history":[],"T":"20"}', '{"v":0,"history":[]}']) {
     assert.equal(readStored(raw).problem, 'hong', raw);
