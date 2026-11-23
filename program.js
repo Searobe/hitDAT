@@ -60,7 +60,7 @@ export function daysBetween(a, b) {
 export function initialState() {
   return {
     v: 1,
-    settings: { mode: 'camera', sound: true, count: 'beep', legsAuto: false }, // count: 'beep' | 'voice'; legsAuto: màn hướng dẫn động tác chân tự vào tập sau vài giây thay vì đợi bấm
+    settings: { mode: 'camera', calibrate: false, sound: true, count: 'beep', legsAuto: false }, // calibrate: đếm camera theo cách cũ, hiệu chỉnh tay trước buổi (dự phòng; mặc định camera tự thích nghi, detect.js); count: 'beep' | 'voice'; legsAuto: màn hướng dẫn động tác chân tự vào tập sau vài giây thay vì đợi bấm
     calib: null,
     T: null, // mức tối đa đang dùng để tính hiệp
     week: 1,

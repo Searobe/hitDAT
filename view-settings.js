@@ -20,7 +20,8 @@ function viewSettings({ keep = false } = {}) {
 
     <h2>Đếm lượt</h2>
     <div class="card menu">
-      ${toggle('mode', s.mode === 'camera', 'Đếm bằng camera trước', 'Tắt thì chỉ đếm bằng chạm màn hình. Hình không lưu, không gửi đi.')}
+      ${toggle('mode', s.mode === 'camera', 'Đếm bằng camera trước', 'Máy tự nhận lượt, không cần hiệu chỉnh. Tắt thì chỉ đếm bằng chạm màn hình. Hình không lưu, không gửi đi.')}
+      ${toggle('calibrate', !!s.calibrate, 'Hiệu chỉnh tay trước buổi', 'Dự phòng khi camera tự đếm sót hoặc thừa: trước buổi đo tư thế cao và thấp khoảng 8 giây.', s.mode !== 'camera')}
     </div>
 
     <h2>Âm thanh</h2>
@@ -50,7 +51,12 @@ function viewSettings({ keep = false } = {}) {
   `, { tab: 'settings', keep });
 
   // Công tắc đổi tại chỗ, không dựng lại trang nên trang không nhảy.
-  on('mode', (e) => { s.mode = e.target.checked ? 'camera' : 'touch'; save(); }, 'change');
+  on('mode', (e) => {
+    s.mode = e.target.checked ? 'camera' : 'touch';
+    save();
+    document.getElementById('calibrate').disabled = s.mode !== 'camera';
+  }, 'change');
+  on('calibrate', (e) => { s.calibrate = e.target.checked; save(); }, 'change');
   on('sound', (e) => {
     s.sound = e.target.checked;
     save(); unlockAudio(); beep(880);

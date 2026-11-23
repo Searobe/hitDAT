@@ -7,6 +7,7 @@ App tập hít đất: thử sức → lên lịch → đếm lượt, mục ti�
 - Web app tĩnh, không bước dựng, không thư viện ngoài. Chạy trên Safari iOS, thêm ra màn hình chính.
 - `program.js` — lõi chương trình tập, hàm thuần (mọi con số của chương trình ở đây).
 - `progress.js` — số liệu ô «Quá trình tập» (cột hít đất, lịch 4 tuần), hàm thuần. `legs.js` — chương trình tập chân, hàm thuần (động tác, mức, chuỗi bước). `figures.js` — hình giải phẫu bóc da chuyển động theo pha (SVG, hàm thuần: tư thế khoá, khung xương, từng đầu cơ; cường độ cơ theo pha co – thả của từng động tác).
+- `detect.js` — bộ đếm lượt bằng camera tự thích nghi (ngưỡng trượt theo tín hiệu gần đây, không cần hiệu chỉnh), hàm thuần. Cách cũ (hiệu chỉnh tay, `makeRepDetector` / `chooseCalibration` ở `program.js`) còn làm dự phòng, bật ở Cài đặt.
 - `store.js` — đọc – kiểm dữ liệu lưu, file sao lưu, buổi đang dở; `clock.js` — đồng hồ đếm lùi theo giờ thật. Hàm thuần.
 - `app.js` — chỉ khởi động (số bản `VERSION`, đăng ký `sw.js`). Giao diện tách thành file nhỏ: `ui.js` (thanh 3 thẻ, dựng màn, màn tập phủ kín, hộp xác nhận trong app, công tắc, đồng hồ), `view-today.js` / `view-progress.js` / `view-settings.js` (3 thẻ Hôm nay · Tiến trình · Cài đặt), `view-workout.js` (buổi hít đất), `view-legs.js` (tập chân), `backup.js` (sao lưu – khôi phục), `data.js` (`localStorage`, khoá `hitdat.v1`), `sound.js`, `camera.js`, `format.js`.
 - `today.js` — chọn một việc chính cho trang Hôm nay, hàm thuần.
